@@ -328,11 +328,10 @@ function renderTotal(){
 
 /* ---------- Palette UI ---------- */
 
-function closeAllPalettes(exceptNode=null){
-  $$(".palette").forEach(p => {
-    if (p !== exceptNode) p.hidden = true;
-  });
+function closeAllPalettes(exceptTask=null){
+  $$(".task.show-palette").forEach(t => { if (t !== exceptTask) t.classList.remove("show-palette"); });
 }
+
 
 /* ---------- Rendering ---------- */
 
@@ -361,11 +360,12 @@ function createTaskNode(t){
   // Color bar + palette
   const palette = $(".palette", node);
   const bar = $(".colorbar", node);
+  // palette hidden by default; show only on click
   bar.addEventListener("click", (e) => {
     e.stopPropagation();
-    const open = !palette.hidden;
-    closeAllPalettes(palette);
-    palette.hidden = open ? true : false;
+    const isOpen = node.classList.contains("show-palette");
+    closeAllPalettes(node);
+    node.classList.toggle("show-palette", !isOpen);
   });
 
   $$(".pcolor", palette).forEach(btn => {
@@ -373,11 +373,10 @@ function createTaskNode(t){
       e.preventDefault();
       e.stopPropagation();
       setTaskTag(t.id, btn.dataset.color);
-      palette.hidden = true;
+      node.classList.remove("show-palette");
     });
   });
 
-  // Close palette on outside click
   document.addEventListener("click", () => { palette.hidden = true; }, { once: true });
 
   // Time
@@ -691,6 +690,9 @@ async function init(){
   $("#btnHelp").addEventListener("click", toggleHelp);
   $("#btnPip").addEventListener("click", openPiP);
   $("#btnConnectFile").addEventListener("click", connectFile);
+
+  document.addEventListener("click", () => closeAllPalettes());
 }
+
 
 init();

@@ -79,6 +79,15 @@ body{
 
 .actions{ display:flex; gap: 10px; }
 
+.icon{
+  width: 18px;
+  height: 18px;
+  display:block;
+}
+.btn.action{
+  padding: 8px 10px;
+}
+
 /* Layout */
 .content{
   display:flex;
@@ -330,9 +339,9 @@ body{
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: var(--radius-sm);
   z-index: 5;
+  display:none; /* hidden by default */
 }
-.palette[hidden]{ display:none !important; }
-.palette:not([hidden]){ display:flex; }
+.task.show-palette .palette{ display:flex; }
 .pcolor{
   width: 18px;
   height: 18px;
