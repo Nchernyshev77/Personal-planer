@@ -3,11 +3,9 @@
   --radius-sm: 6px;
   --gap: 12px;
   --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-}
 
-.app[data-theme="dark"]{
   /* Reference palette: very dark background + lighter substrate/panels */
-  --bg: #0f0f0f;
+  --bg: #0b0b0b;
   --panel: #232323;
   --panel2: #2a2a2a;
   --text: #f2f2f2;
@@ -79,6 +77,12 @@ body{
 }
 
 .actions{ display:flex; gap: 10px; }
+.actions .btn.ghost{
+  background: #1a1a1a;
+  border-color: rgba(255,255,255,0.12);
+  color: var(--text);
+}
+.actions .btn.ghost:hover{ background: #222; }
 
 /* Layout */
 .content{
@@ -114,7 +118,7 @@ body{
 .add-form{
   display:flex;
   gap: 10px;
-  align-items:center;
+  align-items:flex-start;
 }
 
 .input{
@@ -125,6 +129,12 @@ body{
   padding: 10px 12px;
   border-radius: var(--radius-sm);
   outline:none;
+}
+textarea.input{ resize: none; }
+.input.task-input{
+  min-height: 54px;
+  line-height: 1.4;
+  overflow: hidden;
 }
 .input::placeholder{ color: rgba(242,242,242,0.45); }
 .input:focus{ border-color: rgba(16,163,127,0.7); }
@@ -231,6 +241,7 @@ body{
 
 .list-title{
   font-weight: 650;
+  color: var(--text);
 }
 
 .list-tools{

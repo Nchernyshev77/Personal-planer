@@ -524,6 +524,9 @@ function pointerUp(e){
 
   const list = $("#tasks");
   const first = measurePositions();
+  if (dragState.ghost){
+    first.set(dragState.id, dragState.ghost.getBoundingClientRect());
+  }
 
   dragState.taskEl.style.display = "";
   dragState.taskEl.classList.remove("dragging");
@@ -621,8 +624,20 @@ async function init(){
     const input = $("#taskInput");
     addTask(input.value);
     input.value = "";
+    autoResizeTextarea(input);
     input.focus();
   });
+  const taskInput = $("#taskInput");
+  taskInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey){
+      e.preventDefault();
+      addTask(taskInput.value);
+      taskInput.value = "";
+      autoResizeTextarea(taskInput);
+    }
+  });
+  taskInput.addEventListener("input", () => autoResizeTextarea(taskInput));
+  autoResizeTextarea(taskInput);
 
   $$(".chip").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -647,3 +662,9 @@ async function init(){
 }
 
 init();
+
+function autoResizeTextarea(el){
+  if (!el) return;
+  el.style.height = "auto";
+  el.style.height = `${el.scrollHeight}px`;
+}
