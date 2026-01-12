@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Persanal Planer</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div id="app" class="app" data-theme="dark">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">✓</div>
+        <div class="titles">
+          <div class="title">Persanal Planer</div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="btnPip" class="btn ghost action" title="Картинка-в-картинке / поверх окон">🖼️</button>
+        <button id="btnHelp" class="btn ghost action" title="Подсказки">❓</button>
+      </div>
+    </header>
+
+    <main class="content">
+      <aside class="composer card">
+        <form id="addForm" class="add-form" autocomplete="off">
+          <textarea id="taskInput" class="input textarea" rows="1" placeholder="Добавить задачу…" maxlength="200"></textarea>
+          <button class="btn primary" type="submit">Добавить</button>
+        </form>
+
+        <div class="row">
+          <div class="chips" aria-label="Цвет метки по умолчанию">
+            <span class="label">Цвет:</span>
+            <button type="button" class="chip" data-color="none" aria-label="Без"></button>
+            <button type="button" class="chip" data-color="blue" aria-label="Синяя"></button>
+            <button type="button" class="chip" data-color="yellow" aria-label="Жёлтая"></button>
+            <button type="button" class="chip" data-color="red" aria-label="Красная"></button>
+            <button type="button" class="chip" data-color="purple" aria-label="Фиолетовая"></button>
+            <button type="button" class="chip" data-color="green" aria-label="Зелёная"></button>
+          </div>
+        </div>
+
+        <div class="row storage">
+          <div class="storage-left">
+            <button id="btnConnectFile" class="btn" type="button">Подключить tasks.txt</button>
+            <div id="saveStatus" class="status under">…</div>
+          </div>
+        </div>
+
+        <div id="help" class="help" hidden>
+          <ul>
+            <li><b>Перетаскивание:</b> тяните за «⋮⋮».</li>
+            <li><b>Редактирование:</b> клик по тексту → редактируйте прямо в задаче.</li>
+            <li><b>Цвет:</b> слева у задачи цветной прямоугольник — клик, чтобы сменить.</li>
+            <li><b>Выполнено:</b> галочка появляется только у завершённой задачи.</li>
+            <li><b>Время:</b> справа внизу часы на задачу. Вверху — сумма.</li>
+          </ul>
+        </div>
+      </aside>
+
+      <section class="list card">
+        <div class="list-head">
+          <div class="list-title">Задачи</div>
+
+          <div class="list-tools">
+            <div class="total-box" title="Сумма часов по всем задачам">
+              <span>Всего</span>
+              <b id="totalTime">0 ч</b>
+            </div>
+
+            <input id="searchInput" class="input small" type="search" placeholder="Поиск…" />
+            <button id="btnClearDone" class="btn ghost danger" type="button">Удалить выполненные</button>
+          </div>
+        </div>
+
+        <div id="tasks" class="tasks" role="list"></div>
+
+        <div id="empty" class="empty" hidden>
+          Нет задач. Добавьте первую слева 👈
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <template id="tplTask">
+    <div class="task" role="listitem">
+      <button class="drag" type="button" title="Перетащить" aria-label="Перетащить">⋮⋮</button>
+
+      <button class="colorbar" type="button" title="Цвет" aria-label="Цвет"></button>
+      <div class="palette" hidden>
+        <button type="button" class="pcolor" data-color="none" aria-label="Без"></button>
+        <button type="button" class="pcolor" data-color="blue" aria-label="Синяя"></button>
+        <button type="button" class="pcolor" data-color="yellow" aria-label="Жёлтая"></button>
+        <button type="button" class="pcolor" data-color="red" aria-label="Красная"></button>
+        <button type="button" class="pcolor" data-color="purple" aria-label="Фиолетовая"></button>
+        <button type="button" class="pcolor" data-color="green" aria-label="Зелёная"></button>
+      </div>
+
+      <button class="check" type="button" title="Готово" aria-label="Готово"></button>
+
+      <div class="text" role="textbox" tabindex="0"></div>
+
+      <div class="rightSide">
+        <button class="del" type="button" title="Удалить" aria-label="Удалить">✕</button>
+
+        <div class="timeWrap" title="Время (часы)">
+          <input class="time" type="number" min="0" step="0.25" inputmode="decimal" />
+          <span class="timeUnit">ч</span>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
