@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Planner — мини-задачи</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div id="app" class="app" data-theme="dark">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">✓</div>
+        <div class="titles">
+          <div class="title">Planner</div>
+          <div class="subtitle">микро‑задачи • перетаскивание • автосейв в файл</div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="btnPip" class="btn ghost" title="Картинка-в-картинке / поверх окон">PiP</button>
+        <button id="btnHelp" class="btn ghost" title="Подсказки">?</button>
+      </div>
+    </header>
+
+    <main class="content">
+      <aside class="composer card">
+        <form id="addForm" class="add-form" autocomplete="off">
+          <input id="taskInput" class="input" type="text" placeholder="Добавить задачу… (Enter)" maxlength="200" />
+          <button class="btn primary" type="submit">Добавить</button>
+        </form>
+
+        <div class="row">
+          <div class="chips" aria-label="Цвет метки по умолчанию">
+            <span class="label">Метка:</span>
+            <button type="button" class="chip" data-color="none" aria-label="Без метки"></button>
+            <button type="button" class="chip" data-color="blue" aria-label="Синяя"></button>
+            <button type="button" class="chip" data-color="yellow" aria-label="Жёлтая"></button>
+            <button type="button" class="chip" data-color="red" aria-label="Красная"></button>
+            <button type="button" class="chip" data-color="purple" aria-label="Фиолетовая"></button>
+          </div>
+
+          <div class="right">
+            <span id="saveStatus" class="status">…</span>
+          </div>
+        </div>
+
+        <div class="row storage">
+          <div class="storage-left">
+            <button id="btnConnectFile" class="btn" type="button">Подключить tasks.txt</button>
+          </div>
+        </div>
+
+        <div id="help" class="help" hidden>
+          <ul>
+            <li><b>Перетаскивание:</b> хватайте за «⋮⋮».</li>
+            <li><b>Выполнено:</b> кнопка ✓ слева.</li>
+            <li><b>Метки:</b> кликайте по цветной точке у задачи.</li>
+            <li><b>Автосейв:</b> в Chrome/Edge можно подключить <code>tasks.txt</code> и он будет перезаписываться после каждого изменения. Если файл уже подключали — приложение попробует восстановить доступ автоматически.</li>
+            <li><b>PiP:</b> в Chrome — “Document Picture‑in‑Picture” (поверх окон). Есть fallback в отдельное окно.</li>
+          </ul>
+        </div>
+      </aside>
+
+      <section class="list card">
+        <div class="list-head">
+          <div class="list-title">Задачи</div>
+          <div class="list-tools">
+            <input id="searchInput" class="input small" type="search" placeholder="Поиск…" />
+            <button id="btnClearDone" class="btn ghost" type="button">Удалить выполненные</button>
+            <button id="btnClearAll" class="btn ghost danger" type="button">Очистить всё</button>
+          </div>
+        </div>
+
+        <div id="tasks" class="tasks" role="list"></div>
+
+        <div id="empty" class="empty" hidden>
+          Нет задач. Добавьте первую слева 👈
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <template id="tplTask">
+    <div class="task" draggable="true">
+      <button class="check" type="button" title="Готово" aria-label="Готово">✓</button>
+
+      <button class="drag" type="button" title="Перетащить" aria-label="Перетащить">⋮⋮</button>
+
+      <div class="text" role="textbox" tabindex="0"></div>
+
+      <button class="tag" type="button" title="Метка" aria-label="Метка">
+        <span class="dot" data-color="none"></span>
+      </button>
+
+      <div class="tag-menu" role="menu" hidden>
+        <div class="dot-row">
+          <button type="button" class="dot" data-color="none" aria-label="Без метки"></button>
+          <button type="button" class="dot" data-color="blue" aria-label="Синяя"></button>
+          <button type="button" class="dot" data-color="yellow" aria-label="Жёлтая"></button>
+          <button type="button" class="dot" data-color="red" aria-label="Красная"></button>
+          <button type="button" class="dot" data-color="purple" aria-label="Фиолетовая"></button>
+        </div>
+        <button class="del" type="button" title="Удалить" aria-label="Удалить">✕</button>
+      </div>
+    </div>
+  </template>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
