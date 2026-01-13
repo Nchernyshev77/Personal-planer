@@ -31,7 +31,7 @@
     <main class="content">
       <aside class="composer card">
         <form id="addForm" class="add-form" autocomplete="off">
-          <textarea id="taskInput" class="input textarea" rows="1" placeholder="Добавить задачу…" maxlength="200"></textarea>
+          <textarea id="taskInput" class="input textarea" rows="1" placeholder="Добавить задачу…" maxlength="600"></textarea>
           <button class="btn primary" type="submit">Добавить</button>
         </form>
 
@@ -73,10 +73,8 @@
             <div class="total-box" title="Сумма часов по всем задачам">
               <span>Всего</span>
               <b id="totalTime">0 ч</b>
-            </div>
-
-            <input id="searchInput" class="input small" type="search" placeholder="Поиск…" />
-            <button id="btnClearDone" class="btn ghost danger" type="button">Удалить выполненные</button>
+            </div>            <button id="btnClearDone" class="btn ghost" type="button">Удалить выполненные</button>
+            <button id="btnClearAll" class="btn ghost danger" type="button">Удалить все</button>
           </div>
         </div>
 

@@ -35,7 +35,7 @@ function deserialize(text){
       .filter(t => typeof t?.id === "string" && typeof t?.text === "string")
       .map(t => ({
         id: t.id,
-        text: String(t.text).slice(0, 200),
+        text: String(t.text).slice(0, 600),
         done: !!t.done,
         tag: ["none","blue","yellow","red","purple","green"].includes(t.tag) ? t.tag : "none",
         hours: Number.isFinite(+t.hours) ? Math.max(0, +t.hours) : 0,
@@ -245,7 +245,7 @@ function addTask(text){
   if (!t) return;
   state.tasks.unshift({
     id: uid(),
-    text: t.slice(0,200),
+    text: t.slice(0,600),
     done: false,
     tag: state.defaultTag,
     hours: 0,
@@ -277,7 +277,7 @@ function setTaskTag(id, tag){
 function updateText(id, text){
   const t = state.tasks.find(x => x.id === id);
   if (!t) return;
-  const v = (text || "").trim().replace(/\s+/g, " ").slice(0,200);
+  const v = (text || "").trim().replace(/\s+/g, " ").slice(0,600);
   if (!v) return;
   t.text = v;
   t.updatedAt = nowISO();
@@ -300,6 +300,12 @@ function removeTask(id){
   debouncedSave();
 }
 
+function clearAll(){
+  state.tasks = [];
+  renderAll();
+  debouncedSave();
+}
+
 function clearDone(){
   const before = state.tasks.length;
   state.tasks = state.tasks.filter(t => !t.done);
@@ -311,11 +317,7 @@ function clearDone(){
 
 /* ---------- Filter & totals ---------- */
 
-function matchesFilter(t){
-  const q = state.filter.trim().toLowerCase();
-  if (!q) return true;
-  return t.text.toLowerCase().includes(q);
-}
+function matchesFilter(t){ return true; }
 
 function renderTotal(){
   const total = state.tasks.reduce((s, t) => s + (Number.isFinite(+t.hours) ? +t.hours : 0), 0);
@@ -647,7 +649,7 @@ async function openPiP(){
 function autosizeTextarea(el){
   if (!el) return;
   el.style.height = "0px";
-  const h = Math.min(220, Math.max(46, el.scrollHeight));
+  const h = Math.max(46, el.scrollHeight);
   el.style.height = h + "px";
 }
 
@@ -680,13 +682,10 @@ async function init(){
   });
   const initChip = $(`.chip[data-color="${state.defaultTag}"]`);
   if (initChip) initChip.classList.add("active");
-
-  $("#searchInput").addEventListener("input", (e) => {
-    state.filter = e.target.value;
-    renderAll();
   });
 
   $("#btnClearDone").addEventListener("click", clearDone);
+  $("#btnClearAll").addEventListener("click", clearAll);
   $("#btnHelp").addEventListener("click", toggleHelp);
   $("#btnPip").addEventListener("click", openPiP);
   $("#btnConnectFile").addEventListener("click", connectFile);
