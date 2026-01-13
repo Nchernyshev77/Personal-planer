@@ -396,7 +396,7 @@ function renderAll(){
   list.innerHTML = "";
 
   const tasks = state.tasks.filter(matchesFilter);
-  empty.hidden = tasks.length !== 0;
+  if (empty) empty.hidden = true;
 
   for (const t of tasks){
     list.appendChild(createTaskNode(t));

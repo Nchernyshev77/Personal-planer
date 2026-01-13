@@ -82,9 +82,7 @@
 
         <div id="tasks" class="tasks" role="list"></div>
 
-        <div id="empty" class="empty" hidden>
-          Нет задач. Добавьте первую слева 👈
-        </div>
+        <div id="empty" class="empty" hidden></div>
       </section>
     </main>
   </div>
@@ -93,14 +91,16 @@
     <div class="task" role="listitem">
       <button class="drag" type="button" title="Перетащить" aria-label="Перетащить">⋮⋮</button>
 
-      <button class="colorbar" type="button" title="Цвет" aria-label="Цвет"></button>
-      <div class="palette" hidden>
+      <div class="colorwrap">
+        <button class="colorbar" type="button" title="Цвет" aria-label="Цвет"></button>
+        <div class="palette" hidden>
         <button type="button" class="pcolor" data-color="none" aria-label="Без"></button>
         <button type="button" class="pcolor" data-color="blue" aria-label="Синяя"></button>
         <button type="button" class="pcolor" data-color="yellow" aria-label="Жёлтая"></button>
         <button type="button" class="pcolor" data-color="red" aria-label="Красная"></button>
         <button type="button" class="pcolor" data-color="purple" aria-label="Фиолетовая"></button>
         <button type="button" class="pcolor" data-color="green" aria-label="Зелёная"></button>
+        </div>
       </div>
 
       <button class="check" type="button" title="Готово" aria-label="Готово"></button>

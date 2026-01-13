@@ -59,7 +59,7 @@ body{
 }
 
 .logo{
-  width: 34px;
+  width: 22px;
   height: 34px;
   border-radius: var(--radius-sm);
   background: var(--panel);
@@ -80,8 +80,8 @@ body{
 .actions{ display:flex; gap: 10px; }
 
 .icon{
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
   display:block;
 }
 .btn.action{
@@ -313,6 +313,12 @@ body{
 }
 .drag:active{ cursor:grabbing; }
 
+.colorwrap{
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+
 /* left full-height color rectangle */
 .colorbar{
   width: 22px;
@@ -331,14 +337,15 @@ body{
 /* palette popup */
 .palette{
   position:absolute;
-  left: 56px;
-  top: 10px;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
   padding: 8px;
   gap: 8px;
   background: var(--panel2);
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: var(--radius-sm);
-  z-index: 5;
+  z-index: 8;
   display:none; /* hidden by default */
 }
 .task.show-palette .palette{ display:flex; }
@@ -421,7 +428,7 @@ body{
   border-radius: var(--radius-sm);
 }
 .time{
-  width: 34px;
+  width: 22px;
   background: transparent;
   border: none;
   outline: none;
