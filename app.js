@@ -38,7 +38,7 @@ function deserialize(text){
         text: String(t.text).slice(0, 600),
         done: !!t.done,
         tag: ["none","blue","yellow","red","purple","green"].includes(t.tag) ? t.tag : "none",
-        hours: Number.isFinite(+t.hours) ? Math.max(0, +t.hours) : 0,
+        hours: (typeof t.hours === "string" ? t.hours : (Number.isFinite(+t.hours) ? String(Math.max(0, +t.hours)) : "")),
         createdAt: t.createdAt || nowISO(),
         updatedAt: t.updatedAt || nowISO(),
       }));
@@ -248,7 +248,7 @@ function addTask(text){
     text: t.slice(0,600),
     done: false,
     tag: state.defaultTag,
-    hours: 0,
+    hours: "",
     createdAt: nowISO(),
     updatedAt: nowISO(),
   });
@@ -284,11 +284,25 @@ function updateText(id, text){
   debouncedSave();
 }
 
-function setTaskHours(id, hours){
+function parseHoursText(raw){
+  const s0 = String(raw ?? "").trim();
+  if (!s0) return { text: "", min: 0, max: 0, isRange: false };
+  const s = s0.replace(",", ".").replace(/\s+/g, "");
+  const m = s.match(/^(\d+(?:\.\d+)?)(?:-(\d+(?:\.\d+)?))?$/);
+  if (!m) return { text: s0.slice(0,20), min: 0, max: 0, isRange: false, invalid: true };
+  const a = parseFloat(m[1]);
+  const b = m[2] ? parseFloat(m[2]) : a;
+  const min = Math.min(a, b);
+  const max = Math.max(a, b);
+  const text = m[2] ? `${min}-${max}` : String(min);
+  return { text, min, max, isRange: !!m[2] };
+}
+
+function setTaskHours(id, value){
   const t = state.tasks.find(x => x.id === id);
   if (!t) return;
-  const v = Number.isFinite(+hours) ? Math.max(0, +hours) : 0;
-  t.hours = v;
+  const parsed = parseHoursText(value);
+  t.hours = parsed.text;
   t.updatedAt = nowISO();
   renderTotal();
   debouncedSave();
@@ -319,15 +333,6 @@ function clearDone(){
 
 function matchesFilter(t){ return true; }
 
-function renderTotal(){
-  const total = state.tasks.reduce((s, t) => s + (Number.isFinite(+t.hours) ? +t.hours : 0), 0);
-  const el = $("#totalTime");
-  if (el){
-    const rounded = Math.round(total * 100) / 100;
-    el.textContent = `${rounded} ч`;
-  }
-}
-
 /* ---------- Palette UI ---------- */
 
 function closeAllPalettes(exceptTask=null){
@@ -346,6 +351,7 @@ function createTaskNode(t){
 
   $(".drag", node).addEventListener("pointerdown", (e) => startPointerDrag(e, node));
 
+  $(".check", node).addEventListener("pointerdown", (e) => { e.preventDefault(); });
   $(".check", node).addEventListener("click", () => toggleDone(t.id));
 
   const textEl = $(".text", node);
@@ -363,6 +369,7 @@ function createTaskNode(t){
   const palette = $(".palette", node);
   const bar = $(".colorbar", node);
   // palette hidden by default; show only on click
+  bar.addEventListener("pointerdown", (e) => { e.preventDefault(); });
   bar.addEventListener("click", (e) => {
     e.stopPropagation();
     const isOpen = node.classList.contains("show-palette");
@@ -384,9 +391,10 @@ function createTaskNode(t){
   // Time
   const timeInput = $(".time", node);
   timeInput.value = t.hours ? String(t.hours) : "";
-  timeInput.addEventListener("change", () => setTaskHours(t.id, timeInput.value));
+  timeInput.addEventListener("input", () => renderTotal());
   timeInput.addEventListener("blur", () => setTaskHours(t.id, timeInput.value));
 
+  $(".del", node).addEventListener("pointerdown", (e) => { e.preventDefault(); });
   $(".del", node).addEventListener("click", () => removeTask(t.id));
 
   return node;
@@ -685,7 +693,9 @@ async function init(){
 
   $("#btnClearDone").addEventListener("click", clearDone);
   $("#btnClearAll").addEventListener("click", clearAll);
+  $("#btnHelp").addEventListener("pointerdown", (e)=>e.preventDefault());
   $("#btnHelp").addEventListener("click", toggleHelp);
+  $("#btnPip").addEventListener("pointerdown", (e)=>e.preventDefault());
   $("#btnPip").addEventListener("click", openPiP);
   $("#btnConnectFile").addEventListener("click", connectFile);
 

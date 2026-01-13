@@ -15,11 +15,11 @@
   --accent: #10a37f;
   --danger: #ef4444;
 
-  --blue: #3b82f6;
-  --yellow: #f59e0b;
-  --red: #ef4444;
-  --purple: #a855f7;
-  --green: #22c55e;
+  --blue: #4b84b8;
+  --yellow: #b08a3c;
+  --red: #b86161;
+  --purple: #7e6bb3;
+  --green: #3a9a83;
 
   --done: rgba(16, 163, 127, 0.14);
   --taskFill: rgba(255,255,255,0.035);
@@ -46,6 +46,7 @@ body{
   display:flex;
   align-items:center;
   justify-content:space-between;
+  flex-wrap: wrap;
   padding: 18px 18px 10px;
   max-width: 1200px;
   width: 100%;
@@ -59,7 +60,7 @@ body{
 }
 
 .logo{
-  width: 22px;
+  width: 20px;
   height: 34px;
   border-radius: var(--radius-sm);
   background: var(--panel);
@@ -80,12 +81,17 @@ body{
 .actions{ display:flex; gap: 10px; }
 
 .icon{
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 22px;
   display:block;
 }
 .btn.action{
-  padding: 8px 10px;
+  padding: 8px;
+  width: 40px;
+  height: 40px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
 /* Layout */
@@ -322,7 +328,7 @@ body{
 
 /* left full-height color rectangle */
 .colorbar{
-  width: 22px;
+  width: 20px;
   border-radius: 4px;
   border: 1px solid rgba(255,255,255,0.10);
   background: rgba(255,255,255,0.12);
@@ -347,7 +353,7 @@ body{
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: var(--radius-sm);
   z-index: 8;
-  display:none; /* hidden by default */
+  display:none;
 }
 .task.show-palette .palette{ display:flex; }
 .pcolor{
@@ -400,6 +406,10 @@ body{
   line-height: 1.35;
   color: var(--text);
   align-self:center;
+
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow: visible;
 }
 .task.done .text{
   color: rgba(255,255,255,0.72);
@@ -429,7 +439,7 @@ body{
   border-radius: var(--radius-sm);
 }
 .time{
-  width: 22px;
+  width: 20px;
   background: transparent;
   border: none;
   outline: none;
@@ -498,3 +508,17 @@ body{
   .list{ max-width: 100%; }
   .input.small{ width: 100%; }
 }
+
+.btn.dangerSolid{
+  background: rgba(239,68,68,0.22);
+  border-color: rgba(239,68,68,0.55);
+  color: #ffffff;
+}
+.btn.dangerSolid:hover{ background: rgba(239,68,68,0.28); }
+
+.drag, .check, .del, .colorbar, .colorwrap, .rightSide{ flex: 0 0 auto; flex-shrink: 0; }
+.colorwrap{ align-self: stretch; }
+.colorbar{ height: 100%; }
+.task{ align-items: stretch; }
+
+.text::-webkit-scrollbar{ width: 0px; height: 0px; }
