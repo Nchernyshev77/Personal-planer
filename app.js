@@ -6,7 +6,7 @@
 const $ = (sel, root=document) => root.querySelector(sel);
 const $$ = (sel, root=document) => [...root.querySelectorAll(sel)];
 
-const STORAGE_KEY = "planner.tasks.v3";
+const STORAGE_KEY = "planner.tasks.v4";
 
 const state = {
   tasks: [],
@@ -23,7 +23,7 @@ function uid(){ return (crypto?.randomUUID?.() || String(Date.now()) + "-" + Mat
 /* ---------- Serialization ---------- */
 
 function serializeTasks(){
-  return JSON.stringify({ version: 3, updatedAt: nowISO(), tasks: state.tasks }, null, 2);
+  return JSON.stringify({ version: 4, updatedAt: nowISO(), tasks: state.tasks }, null, 2);
 }
 
 function deserialize(text){
@@ -682,7 +682,6 @@ async function init(){
   });
   const initChip = $(`.chip[data-color="${state.defaultTag}"]`);
   if (initChip) initChip.classList.add("active");
-  });
 
   $("#btnClearDone").addEventListener("click", clearDone);
   $("#btnClearAll").addEventListener("click", clearAll);
