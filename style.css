@@ -43,15 +43,21 @@ body{
 
 /* Topbar */
 .topbar{
+
   display:flex;
   align-items:center;
   justify-content:space-between;
-  flex-wrap: wrap;
   padding: 18px 18px 10px;
   max-width: 760px;
   width: 100%;
   margin: 0 auto;
+
+  max-width: 760px;
+  margin: 0 auto;
+  width: 100%;
+  flex-wrap: nowrap;
 }
+
 
 .brand{
   display:flex;
@@ -78,7 +84,12 @@ body{
   letter-spacing: .2px;
 }
 
-.actions{ display:flex; gap: 10px; }
+.actions{
+  display:flex;
+  gap: 10px;
+  align-items:center;
+  justify-content:flex-end;
+}
 
 .icon{
   width: 20px;
@@ -92,6 +103,7 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
+  flex: 0 0 auto;
 }
 
 /* Layout */
@@ -517,12 +529,6 @@ body{
   .input.small{ width: 100%; }
 }
 
-.btn.dangerSolid{
-  background: rgba(255,255,255,0.06);
-  border-color: rgba(255,255,255,0.14);
-  color: #ffffff;
-}
-.btn.dangerSolid:hover{ background: rgba(255,255,255,0.09); }
 
 .drag, .check, .del, .colorbar, .colorwrap, .rightSide{ flex: 0 0 auto; flex-shrink: 0; }
 .colorwrap{ align-self: stretch; }
@@ -541,3 +547,18 @@ body{
 }
 
 .actions{ margin-left: auto; }
+
+.btn.dangerSoft{
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.14);
+  color: rgba(255,255,255,0.92);
+}
+.btn.dangerSoft:hover{
+  background: rgba(255,255,255,0.09);
+  border-color: rgba(255,255,255,0.18);
+}
+
+button{ user-select:none; }
+button:focus{ outline:none; }
+
+.pcolor{ cursor:pointer; }

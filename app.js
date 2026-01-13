@@ -253,7 +253,7 @@ function addTask(text){
     updatedAt: nowISO(),
   });
   renderAll();
-  debouncedSave();
+  saveAll("clear");
 }
 
 function toggleDone(id){
@@ -311,13 +311,13 @@ function setTaskHours(id, value){
 function removeTask(id){
   state.tasks = state.tasks.filter(t => t.id !== id);
   renderAll();
-  debouncedSave();
+  saveAll("clear");
 }
 
 function clearAll(){
   state.tasks = [];
   renderAll();
-  debouncedSave();
+  saveAll("clear");
 }
 
 function clearDone(){
@@ -325,7 +325,7 @@ function clearDone(){
   state.tasks = state.tasks.filter(t => !t.done);
   if (state.tasks.length !== before){
     renderAll();
-    debouncedSave();
+    saveAll("clear");
   }
 }
 
@@ -340,6 +340,7 @@ function closeAllPalettes(exceptTask=null){
 }
 
 
+
 /* ---------- Rendering ---------- */
 
 function createTaskNode(t){
@@ -351,7 +352,7 @@ function createTaskNode(t){
 
   $(".drag", node).addEventListener("pointerdown", (e) => startPointerDrag(e, node));
 
-  $(".check", node).addEventListener("pointerdown", (e) => { e.preventDefault(); e.stopPropagation(); });
+  $(".check", node).addEventListener("pointerdown", (e) => { e.stopPropagation(); });
   $(".check", node).addEventListener("click", () => toggleDone(t.id));
 
   const textEl = $(".text", node);
@@ -369,7 +370,7 @@ function createTaskNode(t){
   const palette = $(".palette", node);
   const bar = $(".colorbar", node);
   // palette hidden by default; show only on click
-  bar.addEventListener("pointerdown", (e) => { e.preventDefault(); e.stopPropagation(); });
+  bar.addEventListener("pointerdown", (e) => { e.stopPropagation(); });
   bar.addEventListener("click", (e) => {
     e.stopPropagation();
     const isOpen = node.classList.contains("show-palette");
@@ -383,10 +384,9 @@ function createTaskNode(t){
       e.stopPropagation();
       setTaskTag(t.id, btn.dataset.color);
       node.classList.remove("show-palette");
+      btn.blur();
     });
   });
-
-  document.addEventListener("click", () => { palette.hidden = true; }, { once: true });
 
   // Time
   const timeInput = $(".time", node);
@@ -395,7 +395,7 @@ function createTaskNode(t){
   timeInput.addEventListener("input", () => { autosizeTimeInput(timeInput); renderTotal(); });
   timeInput.addEventListener("blur", () => { autosizeTimeInput(timeInput); setTaskHours(t.id, timeInput.value); });
 
-  $(".del", node).addEventListener("pointerdown", (e) => { e.preventDefault(); e.stopPropagation(); });
+  $(".del", node).addEventListener("pointerdown", (e) => { e.stopPropagation(); });
   $(".del", node).addEventListener("click", () => removeTask(t.id));
 
   return node;
@@ -704,9 +704,9 @@ async function init(){
 
   $("#btnClearDone").addEventListener("click", clearDone);
   $("#btnClearAll").addEventListener("click", clearAll);
-  $("#btnHelp").addEventListener("pointerdown", (e)=>e.preventDefault());
+  $("#btnHelp").addEventListener("pointerdown", (e)=>e.stopPropagation());
   $("#btnHelp").addEventListener("click", toggleHelp);
-  $("#btnPip").addEventListener("pointerdown", (e)=>e.preventDefault());
+  $("#btnPip").addEventListener("pointerdown", (e)=>e.stopPropagation());
   $("#btnPip").addEventListener("click", openPiP);
   $("#btnConnectFile").addEventListener("click", connectFile);
 
