@@ -15,11 +15,11 @@
   --accent: #10a37f;
   --danger: #ef4444;
 
-  --blue: #4b84b8;
-  --yellow: #b08a3c;
-  --red: #b86161;
-  --purple: #7e6bb3;
-  --green: #3a9a83;
+  --blue: #5b91c7;
+  --yellow: #c99a3f;
+  --red: #c06a6a;
+  --purple: #8d7ac6;
+  --green: #49a892;
 
   --done: rgba(16, 163, 127, 0.14);
   --taskFill: rgba(255,255,255,0.035);
@@ -48,7 +48,7 @@ body{
   justify-content:space-between;
   flex-wrap: wrap;
   padding: 18px 18px 10px;
-  max-width: 1200px;
+  max-width: 760px;
   width: 100%;
   margin: 0 auto;
 }
@@ -236,6 +236,9 @@ body{
   color: var(--muted);
   font-size: 12px;
   line-height: 1.35;
+
+  display:block;
+  color: var(--muted);
 }
 .status.under{
   margin-top: 8px;
@@ -439,13 +442,18 @@ body{
   border-radius: var(--radius-sm);
 }
 .time{
-  width: 20px;
+  
   background: transparent;
   border: none;
   outline: none;
   color: var(--text);
   text-align:right;
   font-variant-numeric: tabular-nums;
+
+  width: 4ch;
+  min-width: 3ch;
+  max-width: 18ch;
+  text-align: center;
 }
 .time::-webkit-outer-spin-button,
 .time::-webkit-inner-spin-button{ -webkit-appearance: none; margin: 0; }
@@ -510,11 +518,11 @@ body{
 }
 
 .btn.dangerSolid{
-  background: rgba(239,68,68,0.22);
-  border-color: rgba(239,68,68,0.55);
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.14);
   color: #ffffff;
 }
-.btn.dangerSolid:hover{ background: rgba(239,68,68,0.28); }
+.btn.dangerSolid:hover{ background: rgba(255,255,255,0.09); }
 
 .drag, .check, .del, .colorbar, .colorwrap, .rightSide{ flex: 0 0 auto; flex-shrink: 0; }
 .colorwrap{ align-self: stretch; }
@@ -522,3 +530,14 @@ body{
 .task{ align-items: stretch; }
 
 .text::-webkit-scrollbar{ width: 0px; height: 0px; }
+
+.check{
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+}
+.drag{
+  width: 26px;
+}
+
+.actions{ margin-left: auto; }

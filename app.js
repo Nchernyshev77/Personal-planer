@@ -351,7 +351,7 @@ function createTaskNode(t){
 
   $(".drag", node).addEventListener("pointerdown", (e) => startPointerDrag(e, node));
 
-  $(".check", node).addEventListener("pointerdown", (e) => { e.preventDefault(); });
+  $(".check", node).addEventListener("pointerdown", (e) => { e.preventDefault(); e.stopPropagation(); });
   $(".check", node).addEventListener("click", () => toggleDone(t.id));
 
   const textEl = $(".text", node);
@@ -369,7 +369,7 @@ function createTaskNode(t){
   const palette = $(".palette", node);
   const bar = $(".colorbar", node);
   // palette hidden by default; show only on click
-  bar.addEventListener("pointerdown", (e) => { e.preventDefault(); });
+  bar.addEventListener("pointerdown", (e) => { e.preventDefault(); e.stopPropagation(); });
   bar.addEventListener("click", (e) => {
     e.stopPropagation();
     const isOpen = node.classList.contains("show-palette");
@@ -391,10 +391,11 @@ function createTaskNode(t){
   // Time
   const timeInput = $(".time", node);
   timeInput.value = t.hours ? String(t.hours) : "";
-  timeInput.addEventListener("input", () => renderTotal());
-  timeInput.addEventListener("blur", () => setTaskHours(t.id, timeInput.value));
+  autosizeTimeInput(timeInput);
+  timeInput.addEventListener("input", () => { autosizeTimeInput(timeInput); renderTotal(); });
+  timeInput.addEventListener("blur", () => { autosizeTimeInput(timeInput); setTaskHours(t.id, timeInput.value); });
 
-  $(".del", node).addEventListener("pointerdown", (e) => { e.preventDefault(); });
+  $(".del", node).addEventListener("pointerdown", (e) => { e.preventDefault(); e.stopPropagation(); });
   $(".del", node).addEventListener("click", () => removeTask(t.id));
 
   return node;
@@ -428,6 +429,7 @@ function renderTaskById(id){
   const timeInput = $(".time", node);
   if (document.activeElement !== timeInput){
     timeInput.value = t.hours ? String(t.hours) : "";
+    autosizeTimeInput(timeInput);
   }
   renderTotal();
 }
@@ -653,6 +655,15 @@ async function openPiP(){
 }
 
 /* ---------- Textarea autosize ---------- */
+
+
+function autosizeTimeInput(input){
+  if (!input) return;
+  const v = String(input.value ?? "");
+  // +1ch padding, min 3ch, max 10ch
+  const ch = Math.max(3, Math.min(18, v.length + 1));
+  input.style.width = ch + "ch";
+}
 
 function autosizeTextarea(el){
   if (!el) return;
