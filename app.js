@@ -130,6 +130,7 @@ async function loadTasksFromFileHandle(handle){
         state.tasks = tasks;
         saveToLocalStorage();
         renderAll();
+  renderTotal();
       }
     }
   }catch(e){
@@ -253,7 +254,8 @@ function addTask(text){
     updatedAt: nowISO(),
   });
   renderAll();
-  saveAll("clear");
+  renderTotal();
+  saveAll("add");
 }
 
 function toggleDone(id){
@@ -289,11 +291,11 @@ function parseHoursText(raw){
   if (!s0) return { text: "", min: 0, max: 0, isRange: false };
   const s = s0.replace(",", ".").replace(/\s+/g, "");
   const m = s.match(/^(\d+(?:\.\d+)?)(?:-(\d+(?:\.\d+)?))?$/);
-  if (!m) return { text: s0.slice(0,20), min: 0, max: 0, isRange: false, invalid: true };
+  if (!m) return { text: s0.slice(0,24), min: 0, max: 0, isRange: false, invalid: true };
   const a = parseFloat(m[1]);
   const b = m[2] ? parseFloat(m[2]) : a;
-  const min = Math.min(a, b);
-  const max = Math.max(a, b);
+  const min = Math.min(a,b);
+  const max = Math.max(a,b);
   const text = m[2] ? `${min}-${max}` : String(min);
   return { text, min, max, isRange: !!m[2] };
 }
@@ -301,22 +303,24 @@ function parseHoursText(raw){
 function setTaskHours(id, value){
   const t = state.tasks.find(x => x.id === id);
   if (!t) return;
-  const parsed = parseHoursText(value);
-  t.hours = parsed.text;
+  const p = parseHoursText(value);
+  t.hours = p.text;
   t.updatedAt = nowISO();
   renderTotal();
-  debouncedSave();
+  saveAll("hours");
 }
 
 function removeTask(id){
   state.tasks = state.tasks.filter(t => t.id !== id);
   renderAll();
-  saveAll("clear");
+  renderTotal();
+  saveAll("remove");
 }
 
 function clearAll(){
   state.tasks = [];
   renderAll();
+  renderTotal();
   saveAll("clear");
 }
 
@@ -325,7 +329,7 @@ function clearDone(){
   state.tasks = state.tasks.filter(t => !t.done);
   if (state.tasks.length !== before){
     renderAll();
-    saveAll("clear");
+    debouncedSave();
   }
 }
 
@@ -333,12 +337,35 @@ function clearDone(){
 
 function matchesFilter(t){ return true; }
 
+function renderTotal(){
+  let minSum = 0;
+  let maxSum = 0;
+  let hasRange = false;
+
+  for (const t of state.tasks){
+    const p = parseHoursText(t.hours);
+    minSum += p.min;
+    maxSum += p.max;
+    if (p.isRange) hasRange = true;
+  }
+
+  const el = $("#totalTime");
+  if (!el) return;
+
+  const r = (x) => Math.round(x * 100) / 100;
+
+  if (!hasRange && Math.abs(minSum - maxSum) < 1e-9){
+    el.textContent = `${r(minSum)} ч`;
+  }else{
+    el.textContent = `${r(minSum)}-${r(maxSum)} ч`;
+  }
+}
+
 /* ---------- Palette UI ---------- */
 
 function closeAllPalettes(exceptTask=null){
   $$(".task.show-palette").forEach(t => { if (t !== exceptTask) t.classList.remove("show-palette"); });
 }
-
 
 
 /* ---------- Rendering ---------- */
@@ -352,7 +379,6 @@ function createTaskNode(t){
 
   $(".drag", node).addEventListener("pointerdown", (e) => startPointerDrag(e, node));
 
-  $(".check", node).addEventListener("pointerdown", (e) => { e.stopPropagation(); });
   $(".check", node).addEventListener("click", () => toggleDone(t.id));
 
   const textEl = $(".text", node);
@@ -370,8 +396,8 @@ function createTaskNode(t){
   const palette = $(".palette", node);
   const bar = $(".colorbar", node);
   // palette hidden by default; show only on click
-  bar.addEventListener("pointerdown", (e) => { e.stopPropagation(); });
   bar.addEventListener("click", (e) => {
+    e.stopPropagation();
     e.stopPropagation();
     const isOpen = node.classList.contains("show-palette");
     closeAllPalettes(node);
@@ -388,14 +414,15 @@ function createTaskNode(t){
     });
   });
 
+  document.addEventListener("click", () => { palette.hidden = true; }, { once: true });
+
   // Time
   const timeInput = $(".time", node);
   timeInput.value = t.hours ? String(t.hours) : "";
   autosizeTimeInput(timeInput);
   timeInput.addEventListener("input", () => { autosizeTimeInput(timeInput); renderTotal(); });
-  timeInput.addEventListener("blur", () => { autosizeTimeInput(timeInput); setTaskHours(t.id, timeInput.value); });
+  timeInput.addEventListener("blur", () => setTaskHours(t.id, timeInput.value));
 
-  $(".del", node).addEventListener("pointerdown", (e) => { e.stopPropagation(); });
   $(".del", node).addEventListener("click", () => removeTask(t.id));
 
   return node;
@@ -656,13 +683,10 @@ async function openPiP(){
 
 /* ---------- Textarea autosize ---------- */
 
-
-function autosizeTimeInput(input){
-  if (!input) return;
-  const v = String(input.value ?? "");
-  // +1ch padding, min 3ch, max 10ch
-  const ch = Math.max(3, Math.min(18, v.length + 1));
-  input.style.width = ch + "ch";
+function autosizeTimeInput(el){
+  const v = String(el.value ?? "");
+  const w = Math.max(3, Math.min(20, v.length + 1));
+  el.style.width = w + "ch";
 }
 
 function autosizeTextarea(el){
@@ -704,9 +728,7 @@ async function init(){
 
   $("#btnClearDone").addEventListener("click", clearDone);
   $("#btnClearAll").addEventListener("click", clearAll);
-  $("#btnHelp").addEventListener("pointerdown", (e)=>e.stopPropagation());
   $("#btnHelp").addEventListener("click", toggleHelp);
-  $("#btnPip").addEventListener("pointerdown", (e)=>e.stopPropagation());
   $("#btnPip").addEventListener("click", openPiP);
   $("#btnConnectFile").addEventListener("click", connectFile);
 

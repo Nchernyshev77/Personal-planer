@@ -15,11 +15,11 @@
   --accent: #10a37f;
   --danger: #ef4444;
 
-  --blue: #5b91c7;
-  --yellow: #c99a3f;
-  --red: #c06a6a;
-  --purple: #8d7ac6;
-  --green: #49a892;
+  --blue: #5a8fc0;
+  --yellow: #c3963f;
+  --red: #c66b6b;
+  --purple: #8a74c2;
+  --green: #41a58c;
 
   --done: rgba(16, 163, 127, 0.14);
   --taskFill: rgba(255,255,255,0.035);
@@ -43,7 +43,6 @@ body{
 
 /* Topbar */
 .topbar{
-
   display:flex;
   align-items:center;
   justify-content:space-between;
@@ -51,11 +50,6 @@ body{
   max-width: 760px;
   width: 100%;
   margin: 0 auto;
-
-  max-width: 760px;
-  margin: 0 auto;
-  width: 100%;
-  flex-wrap: nowrap;
 }
 
 
@@ -66,7 +60,7 @@ body{
 }
 
 .logo{
-  width: 20px;
+  width: 22px;
   height: 34px;
   border-radius: var(--radius-sm);
   background: var(--panel);
@@ -92,7 +86,7 @@ body{
 }
 
 .icon{
-  width: 20px;
+  width: 22px;
   height: 22px;
   display:block;
 }
@@ -248,9 +242,6 @@ body{
   color: var(--muted);
   font-size: 12px;
   line-height: 1.35;
-
-  display:block;
-  color: var(--muted);
 }
 .status.under{
   margin-top: 8px;
@@ -343,7 +334,7 @@ body{
 
 /* left full-height color rectangle */
 .colorbar{
-  width: 20px;
+  width: 22px;
   border-radius: 4px;
   border: 1px solid rgba(255,255,255,0.10);
   background: rgba(255,255,255,0.12);
@@ -368,7 +359,7 @@ body{
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: var(--radius-sm);
   z-index: 8;
-  display:none;
+  display:none; /* hidden by default */
 }
 .task.show-palette .palette{ display:flex; }
 .pcolor{
@@ -454,17 +445,14 @@ body{
   border-radius: var(--radius-sm);
 }
 .time{
-  
-  background: transparent;
-  border: none;
-  outline: none;
-  color: var(--text);
-  text-align:right;
-  font-variant-numeric: tabular-nums;
-
-  width: 4ch;
+  width: 6ch;
   min-width: 3ch;
-  max-width: 18ch;
+  max-width: 20ch;
+  padding: 4px 6px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.95);
   text-align: center;
 }
 .time::-webkit-outer-spin-button,
@@ -529,24 +517,12 @@ body{
   .input.small{ width: 100%; }
 }
 
-
 .drag, .check, .del, .colorbar, .colorwrap, .rightSide{ flex: 0 0 auto; flex-shrink: 0; }
 .colorwrap{ align-self: stretch; }
 .colorbar{ height: 100%; }
 .task{ align-items: stretch; }
 
 .text::-webkit-scrollbar{ width: 0px; height: 0px; }
-
-.check{
-  width: 26px;
-  height: 26px;
-  border-radius: 999px;
-}
-.drag{
-  width: 26px;
-}
-
-.actions{ margin-left: auto; }
 
 .btn.dangerSoft{
   background: rgba(255,255,255,0.06);
@@ -558,7 +534,5 @@ body{
   border-color: rgba(255,255,255,0.18);
 }
 
-button{ user-select:none; }
+button{ user-select:none; -webkit-user-select:none; }
 button:focus{ outline:none; }
-
-.pcolor{ cursor:pointer; }
