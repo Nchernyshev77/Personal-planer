@@ -685,7 +685,8 @@ async function openPiP(){
 
 function autosizeTimeInput(el){
   const v = String(el.value ?? "");
-  const w = Math.max(3, Math.min(20, v.length + 1));
+  // min fits 3 symbols comfortably; expand as user types
+  const w = Math.max(4, Math.min(30, v.length + 1));
   el.style.width = w + "ch";
 }
 
