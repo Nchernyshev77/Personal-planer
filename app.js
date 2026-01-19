@@ -577,7 +577,7 @@ function createTaskNode(t){
 
   // Time
   const timeInput = $(".time", node);
-  const subBtn = $(".subadd", node);
+  const subZone = $(".subzone", node);
   timeInput.value = t.hours ? String(t.hours) : "";
   const hasKids = orderedChildren(t.id).length > 0;
   timeInput.disabled = hasKids;
@@ -587,8 +587,8 @@ function createTaskNode(t){
 
   $(".del", node).addEventListener("click", () => removeTask(t.id));
 
-  subBtn.addEventListener("click", (e) => { e.stopPropagation(); addSubtask(t.id); });
-  subBtn.addEventListener("pointerdown", (e) => e.stopPropagation());
+  subZone.addEventListener("click", (e) => { e.stopPropagation(); addSubtask(t.id); });
+  subZone.addEventListener("pointerdown", (e) => e.stopPropagation());
 
   return node;
 }
