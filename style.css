@@ -291,7 +291,7 @@ body{
 }
 
 .task{
-  position:relative;
+position:relative;
   display:flex;
   align-items:stretch;
   gap: 10px;
@@ -301,7 +301,9 @@ body{
   border-bottom: 1px solid rgba(255,255,255,0.06);
   transition: background 160ms ease;
   min-height: 40px;
+  margin-left: calc(var(--depth, 0) * 18px);
 }
+
 
 .task:hover{ background: var(--taskFillHover); }
 
@@ -485,6 +487,7 @@ body{
   border-top: 1px dashed rgba(255,255,255,0.14);
   border-bottom: 1px dashed rgba(255,255,255,0.14);
   background: rgba(16,163,127,0.06);
+  margin-left: calc(var(--depth, 0) * 18px);
 }
 .task.dragging{ opacity: 0.35; }
 
@@ -546,3 +549,18 @@ button:focus{ outline:none; }
   align-items:center;
   justify-content:flex-end;
 }
+
+.subadd{
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.92);
+  font-size: 18px;
+  line-height: 1;
+}
+.subadd:hover{ background: rgba(255,255,255,0.07); }

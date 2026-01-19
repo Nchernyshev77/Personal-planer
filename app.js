@@ -23,7 +23,7 @@ function uid(){ return (crypto?.randomUUID?.() || String(Date.now()) + "-" + Mat
 /* ---------- Serialization ---------- */
 
 function serializeTasks(){
-  return JSON.stringify({ version: 4, updatedAt: nowISO(), tasks: state.tasks }, null, 2);
+  return JSON.stringify({ version: 5, updatedAt: nowISO(), tasks: state.tasks }, null, 2);
 }
 
 function deserialize(text){
@@ -35,6 +35,7 @@ function deserialize(text){
       .filter(t => typeof t?.id === "string" && typeof t?.text === "string")
       .map(t => ({
         id: t.id,
+        parentId: (typeof t.parentId === "string" && t.parentId) ? t.parentId : null,
         text: String(t.text).slice(0, 600),
         done: !!t.done,
         tag: ["none","blue","yellow","red","purple","green"].includes(t.tag) ? t.tag : "none",
@@ -241,6 +242,111 @@ async function saveAll(reason){
 
 /* ---------- CRUD ---------- */
 
+
+function getTask(id){ return state.tasks.find(t => t.id === id) || null; }
+
+function getChildrenIds(parentId){
+  return state.tasks.filter(t => t.parentId === parentId).map(t => t.id);
+}
+
+function getChildren(parentId){
+  return state.tasks.filter(t => t.parentId === parentId);
+}
+
+function computeDepthById(id){
+  let d = 0;
+  let cur = getTask(id);
+  const seen = new Set();
+  while(cur && cur.parentId){
+    if (seen.has(cur.parentId)) break;
+    seen.add(cur.parentId);
+    d++;
+    cur = getTask(cur.parentId);
+  }
+  return d;
+}
+
+function isDescendantOf(id, ancestorId){
+  if (!id || !ancestorId) return false;
+  let cur = getTask(id);
+  const seen = new Set();
+  while(cur && cur.parentId){
+    if (cur.parentId === ancestorId) return true;
+    if (seen.has(cur.parentId)) break;
+    seen.add(cur.parentId);
+    cur = getTask(cur.parentId);
+  }
+  return false;
+}
+
+function orderedRoots(){
+  return state.tasks.filter(t => !t.parentId);
+}
+
+function orderedChildren(parentId){
+  return state.tasks.filter(t => t.parentId === parentId);
+}
+
+function flattenTasks(){
+  const out = [];
+  const visit = (t) => {
+    out.push(t);
+    for (const c of orderedChildren(t.id)) visit(c);
+  };
+  for (const r of orderedRoots()) visit(r);
+  return out;
+}
+
+function lastDescendantIndexInFlat(flat, id){
+  const start = flat.findIndex(t => t.id === id);
+  if (start === -1) return -1;
+  const baseDepth = computeDepthById(id);
+  let i = start + 1;
+  while(i < flat.length){
+    const d = computeDepthById(flat[i].id);
+    if (d <= baseDepth) break;
+    i++;
+  }
+  return i - 1;
+}
+
+function recomputeAggregates(){
+  // leaf time stays; parent time = sum(children) recursively; parents become read-only in UI
+  const flat = flattenTasks().reverse(); // children first
+  const rangeById = new Map();
+
+  for (const t of flat){
+    const kids = orderedChildren(t.id);
+    if (kids.length){
+      let minSum = 0, maxSum = 0;
+      for (const c of kids){
+        const r = rangeById.get(c.id) || parseHoursText(c.hours);
+        minSum += r.min; maxSum += r.max;
+      }
+      const text = (Math.abs(minSum-maxSum) < 1e-9) ? String(round2(minSum)) : `${round2(minSum)}-${round2(maxSum)}`;
+      t.hours = text;
+      rangeById.set(t.id, {text, min:minSum, max:maxSum, isRange: Math.abs(minSum-maxSum) >= 1e-9});
+    }else{
+      const r = parseHoursText(t.hours);
+      rangeById.set(t.id, r);
+    }
+  }
+}
+
+function round2(x){ return Math.round(x*100)/100; }
+
+function insertTaskAfterSubtree(parentId, taskObj){
+  const flat = flattenTasks();
+  const lastIdx = lastDescendantIndexInFlat(flat, parentId);
+  if (lastIdx === -1){
+    state.tasks.push(taskObj);
+    return;
+  }
+  const afterId = flat[lastIdx].id;
+  const pos = state.tasks.findIndex(t => t.id === afterId);
+  state.tasks.splice(pos+1, 0, taskObj);
+}
+
 function addTask(text){
   const t = text.trim();
   if (!t) return;
@@ -249,6 +355,7 @@ function addTask(text){
     text: t.slice(0,600),
     done: false,
     tag: state.defaultTag,
+    parentId: null,
     hours: "",
     createdAt: nowISO(),
     updatedAt: nowISO(),
@@ -257,6 +364,32 @@ function addTask(text){
   renderTotal();
   saveAll("add");
 }
+
+
+function addSubtask(parentId){
+  const parent = getTask(parentId);
+  if (!parent) return;
+  const t = {
+    id: uid(),
+    parentId: parentId,
+    text: "",
+    done: false,
+    tag: state.defaultTag,
+    hours: "",
+    createdAt: nowISO(),
+    updatedAt: nowISO(),
+  };
+  insertTaskAfterSubtree(parentId, t);
+  renderAll();
+  renderTotal();
+  saveAll("subadd");
+  // focus the new subtask text
+  requestAnimationFrame(() => {
+    const el = document.querySelector(`.task[data-id="${t.id}"] .text`);
+    el?.focus?.();
+  });
+}
+
 
 function toggleDone(id){
   const t = state.tasks.find(x => x.id === id);
@@ -306,12 +439,25 @@ function setTaskHours(id, value){
   const p = parseHoursText(value);
   t.hours = p.text;
   t.updatedAt = nowISO();
+  renderAll();
   renderTotal();
   saveAll("hours");
 }
 
 function removeTask(id){
-  state.tasks = state.tasks.filter(t => t.id !== id);
+  const toRemove = new Set([id]);
+  // collect descendants
+  let changed = true;
+  while(changed){
+    changed = false;
+    for (const t of state.tasks){
+      if (t.parentId && toRemove.has(t.parentId) && !toRemove.has(t.id)){
+        toRemove.add(t.id);
+        changed = true;
+      }
+    }
+  }
+  state.tasks = state.tasks.filter(t => !toRemove.has(t.id));
   renderAll();
   renderTotal();
   saveAll("remove");
@@ -325,12 +471,22 @@ function clearAll(){
 }
 
 function clearDone(){
-  const before = state.tasks.length;
-  state.tasks = state.tasks.filter(t => !t.done);
-  if (state.tasks.length !== before){
-    renderAll();
-    debouncedSave();
+  const doneIds = new Set(state.tasks.filter(t => t.done).map(t => t.id));
+  // also remove descendants
+  let changed = true;
+  while(changed){
+    changed = false;
+    for (const t of state.tasks){
+      if (t.parentId && doneIds.has(t.parentId) && !doneIds.has(t.id)){
+        doneIds.add(t.id);
+        changed = true;
+      }
+    }
   }
+  state.tasks = state.tasks.filter(t => !doneIds.has(t.id));
+  renderAll();
+  renderTotal();
+  saveAll("clearDone");
 }
 
 /* ---------- Filter & totals ---------- */
@@ -338,11 +494,12 @@ function clearDone(){
 function matchesFilter(t){ return true; }
 
 function renderTotal(){
+  recomputeAggregates();
   let minSum = 0;
   let maxSum = 0;
   let hasRange = false;
 
-  for (const t of state.tasks){
+  for (const t of orderedRoots()){
     const p = parseHoursText(t.hours);
     minSum += p.min;
     maxSum += p.max;
@@ -374,6 +531,8 @@ function createTaskNode(t){
   const tpl = $("#tplTask");
   const node = tpl.content.firstElementChild.cloneNode(true);
   node.dataset.id = t.id;
+  node.dataset.parentId = t.parentId || "";
+  node.style.setProperty("--depth", computeDepthById(t.id));
   node.classList.toggle("done", !!t.done);
   node.classList.add("tag-" + (t.tag || "none"));
 
@@ -418,12 +577,18 @@ function createTaskNode(t){
 
   // Time
   const timeInput = $(".time", node);
+  const subBtn = $(".subadd", node);
   timeInput.value = t.hours ? String(t.hours) : "";
+  const hasKids = orderedChildren(t.id).length > 0;
+  timeInput.disabled = hasKids;
   autosizeTimeInput(timeInput);
   timeInput.addEventListener("input", () => { autosizeTimeInput(timeInput); renderTotal(); });
   timeInput.addEventListener("blur", () => setTaskHours(t.id, timeInput.value));
 
   $(".del", node).addEventListener("click", () => removeTask(t.id));
+
+  subBtn.addEventListener("click", (e) => { e.stopPropagation(); addSubtask(t.id); });
+  subBtn.addEventListener("pointerdown", (e) => e.stopPropagation());
 
   return node;
 }
@@ -433,7 +598,9 @@ function renderAll(){
   const empty = $("#empty");
   list.innerHTML = "";
 
-  const tasks = state.tasks.filter(matchesFilter);
+  recomputeAggregates();
+
+  const tasks = flattenTasks();
   if (empty) empty.hidden = true;
 
   for (const t of tasks){
@@ -506,6 +673,23 @@ function findInsertBefore(container, y){
   return null;
 }
 
+
+function getTaskElFromPoint(x,y){
+  const el = document.elementFromPoint(x,y);
+  return el ? el.closest(".task") : null;
+}
+
+function findLastDescendantEl(taskEl){
+  const depth = Number(taskEl.style.getPropertyValue("--depth")) || 0;
+  let cur = taskEl;
+  while(cur.nextElementSibling && cur.nextElementSibling.classList.contains("task")){
+    const nd = Number(cur.nextElementSibling.style.getPropertyValue("--depth")) || 0;
+    if (nd <= depth) break;
+    cur = cur.nextElementSibling;
+  }
+  return cur;
+}
+
 function startPointerDrag(e, taskEl){
   e.preventDefault();
   e.stopPropagation();
@@ -531,6 +715,7 @@ function startPointerDrag(e, taskEl){
   const placeholder = document.createElement("div");
   placeholder.className = "placeholder";
   placeholder.style.height = `${rect.height}px`;
+  placeholder.style.setProperty("--depth", computeDepthById(id));
 
   const first = measurePositions();
   list.insertBefore(placeholder, taskEl.nextSibling);
@@ -538,7 +723,7 @@ function startPointerDrag(e, taskEl){
   taskEl.style.display = "none";
   animateFLIP(first);
 
-  dragState = { id, taskEl, ghost, placeholder, offsetX, offsetY, pointerId: e.pointerId };
+  dragState = { id, taskEl, ghost, placeholder, offsetX, offsetY, pointerId: e.pointerId, newParentId: (getTask(id)?.parentId || null) };
 
   const onMove = (ev) => pointerMove(ev);
   const onUp = (ev) => pointerUp(ev);
@@ -558,9 +743,51 @@ function pointerMove(e){
   dragState.ghost.style.transform = `translate(${x}px, ${y}px)`;
 
   const list = $("#tasks");
-  const beforeEl = findInsertBefore(list, e.clientY);
 
+  const overTask = getTaskElFromPoint(e.clientX, e.clientY);
   const first = measurePositions();
+
+  if (overTask && overTask.dataset.id !== dragState.id && !isDescendantOf(overTask.dataset.id, dragState.id)){
+    const overRect = overTask.getBoundingClientRect();
+    const overId = overTask.dataset.id;
+    const overParent = overTask.dataset.parentId || null;
+    const overDepth = computeDepthById(overId);
+
+    const indentThreshold = overRect.left + 70; // a bit to the right of controls
+    const wantsSub = e.clientX > indentThreshold;
+
+    if (wantsSub){
+      dragState.newParentId = overId;
+      const last = findLastDescendantEl(overTask);
+      if (dragState.placeholder !== last.nextElementSibling){
+        list.insertBefore(dragState.placeholder, last.nextElementSibling);
+      }
+      dragState.placeholder.style.setProperty("--depth", overDepth + 1);
+    }else{
+      dragState.newParentId = overParent;
+      const midY = overRect.top + overRect.height/2;
+      if (e.clientY < midY){
+        if (dragState.placeholder !== overTask){
+          list.insertBefore(dragState.placeholder, overTask);
+        }
+      }else{
+        const last = findLastDescendantEl(overTask);
+        if (dragState.placeholder !== last.nextElementSibling){
+          list.insertBefore(dragState.placeholder, last.nextElementSibling);
+        }
+      }
+      dragState.placeholder.style.setProperty("--depth", overDepth);
+    }
+
+    animateFLIP(first);
+    return;
+  }
+
+  // fallback: free move within list (root)
+  dragState.newParentId = null;
+  dragState.placeholder.style.setProperty("--depth", 0);
+
+  const beforeEl = findInsertBefore(list, e.clientY);
   if (beforeEl){
     if (beforeEl !== dragState.placeholder.nextSibling){
       list.insertBefore(dragState.placeholder, beforeEl);
@@ -608,11 +835,17 @@ async function pointerUp(e){
   try{ await ghostAnim.finished; }catch{}
   dragState.ghost.remove();
 
-  // Update state order from DOM
+  // Update state order from DOM + parentId change
   const ids = [...list.querySelectorAll(".task")].map(el => el.dataset.id);
   const map = new Map(state.tasks.map(t => [t.id, t]));
+  const moved = map.get(dragState.id);
+  if (moved){
+    moved.parentId = dragState.newParentId || null;
+    moved.updatedAt = nowISO();
+  }
   state.tasks = ids.map(id => map.get(id)).filter(Boolean);
 
+  renderAll();
   renderTotal();
   debouncedSave();
   dragState = null;
