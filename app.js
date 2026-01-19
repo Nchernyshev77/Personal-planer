@@ -1,3 +1,4 @@
+console.log('Persanal Planer v22');
 // Persanal Planer — задачи (перетаскивание, цвета, время, автосейв в файл).
 // Сохранение:
 // - tasks.txt через File System Access API (Chrome/Edge) — файл перезаписывается после каждого изменения.
