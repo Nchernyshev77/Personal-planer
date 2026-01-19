@@ -587,8 +587,10 @@ function createTaskNode(t){
 
   $(".del", node).addEventListener("click", () => removeTask(t.id));
 
-  subZone.addEventListener("click", (e) => { e.stopPropagation(); addSubtask(t.id); });
-  subZone.addEventListener("pointerdown", (e) => e.stopPropagation());
+  if (subZone){
+    subZone.addEventListener("click", (e) => { e.stopPropagation(); addSubtask(t.id); });
+    subZone.addEventListener("pointerdown", (e) => e.stopPropagation());
+  }
 
   return node;
 }
