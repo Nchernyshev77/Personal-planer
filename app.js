@@ -9,6 +9,7 @@ const $$ = (sel, root=document) => [...root.querySelectorAll(sel)];
 const STORAGE_KEY = "planner.tasks.v4";
 
 const state = {
+  collapsed: new Set(),
   tasks: [],
   defaultTag: "none",
   fileHandle: null,
@@ -23,7 +24,7 @@ function uid(){ return (crypto?.randomUUID?.() || String(Date.now()) + "-" + Mat
 /* ---------- Serialization ---------- */
 
 function serializeTasks(){
-  return JSON.stringify({ version: 6, updatedAt: nowISO(), tasks: state.tasks }, null, 2);
+  return JSON.stringify({ version: 7, updatedAt: nowISO(), tasks: state.tasks, collapsed: Array.from(state.collapsed||[]) }, null, 2);
 }
 
 function deserialize(text){
@@ -50,6 +51,20 @@ function deserialize(text){
 
 function saveToLocalStorage(){
   try{ localStorage.setItem(STORAGE_KEY, serializeTasks()); }catch{}
+}
+
+
+function loadCollapsedFromLocalStorage(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return new Set();
+    const o = JSON.parse(raw);
+    const arr = Array.isArray(o?.collapsed) ? o.collapsed : [];
+    return new Set(arr.filter(x => typeof x === "string"));
+  }catch(e){
+    console.warn(e);
+    return new Set();
+  }
 }
 
 function loadFromLocalStorage(){
@@ -287,10 +302,37 @@ function orderedChildren(parentId){
   return state.tasks.filter(t => t.parentId === parentId);
 }
 
+
+function isCollapsed(id){
+  return !!(state.collapsed && state.collapsed.has(id));
+}
+
+function toggleCollapse(id){
+  if (!state.collapsed) state.collapsed = new Set();
+  if (state.collapsed.has(id)) state.collapsed.delete(id);
+  else state.collapsed.add(id);
+  renderAll();
+  debouncedSave();
+}
+
+function countDescendants(id){
+  let count = 0;
+  const stack = [id];
+  while(stack.length){
+    const pid = stack.pop();
+    for (const c of orderedChildren(pid)){
+      count++;
+      stack.push(c.id);
+    }
+  }
+  return count;
+}
+
 function flattenTasks(){
   const out = [];
   const visit = (t) => {
     out.push(t);
+    if (isCollapsed(t.id)) return;
     for (const c of orderedChildren(t.id)) visit(c);
   };
   for (const r of orderedRoots()) visit(r);
@@ -454,16 +496,33 @@ function setTaskHours(id, value){
 
   if (kids.length){
     if (!parsed.text){
-      for (const c of kids){
-        c.hours = "";
-        c.updatedAt = nowISO();
-      }
-    }else{
-      const n = kids.length;
-      const minEach = parsed.min / n;
-      const maxEach = parsed.max / n;
+      // clearing parent should not overwrite children
+      renderAll();
+      renderTotal();
+      debouncedSave();
+      return;
+    }
 
-      for (const c of kids){
+    let setMin = 0, setMax = 0;
+    const emptyKids = [];
+    for (const c of kids){
+      const p = parseHoursText(c.hours);
+      if (!p.text){
+        emptyKids.push(c);
+      }else{
+        setMin += p.min;
+        setMax += p.max;
+      }
+    }
+
+    if (emptyKids.length){
+      const remMin = Math.max(0, parsed.min - setMin);
+      const remMax = Math.max(0, parsed.max - setMax);
+      const n = emptyKids.length;
+      const minEach = remMin / n;
+      const maxEach = remMax / n;
+
+      for (const c of emptyKids){
         const text = (Math.abs(minEach - maxEach) < 1e-9)
           ? String(round2(minEach))
           : `${round2(minEach)}-${round2(maxEach)}`;
@@ -616,8 +675,14 @@ function createTaskNode(t){
   // Time
   const timeInput = $(".time", node);
   const subZone = $(".subzone", node);
+  const collapseBtn = $(".collapse", node);
+  const hiddenCount = $(".hiddenCount", node);
   timeInput.value = t.hours ? String(t.hours) : "";
   const hasKids = orderedChildren(t.id).length > 0;
+  node.classList.toggle("hasKids", hasKids);
+  const collapsed = hasKids && isCollapsed(t.id);
+  node.classList.toggle("collapsed", collapsed);
+  if (hiddenCount) hiddenCount.textContent = collapsed ? String(countDescendants(t.id)) : "";
   timeInput.disabled = false;
   autosizeTimeInput(timeInput);
   timeInput.addEventListener("input", () => { autosizeTimeInput(timeInput); renderTotal(); });
@@ -628,6 +693,12 @@ function createTaskNode(t){
   if (subZone){
     subZone.addEventListener("click", (e) => { e.stopPropagation(); addSubtask(t.id); });
     subZone.addEventListener("pointerdown", (e) => e.stopPropagation());
+  }
+
+  if (collapseBtn){
+    collapseBtn.hidden = !hasKids;
+    collapseBtn.addEventListener("click", (e) => { e.stopPropagation(); toggleCollapse(t.id); });
+    collapseBtn.addEventListener("pointerdown", (e) => e.stopPropagation());
   }
 
   return node;
