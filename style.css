@@ -295,12 +295,12 @@ body{
   display:flex;
   align-items:stretch;
   gap: 10px;
-  padding: 10px 12px;
+  padding: 8px 10px;
   background: var(--taskFill);
   border-top: 1px solid rgba(255,255,255,0.06);
   border-bottom: 1px solid rgba(255,255,255,0.06);
   transition: background 160ms ease;
-  min-height: 48px;
+  min-height: 40px;
 }
 
 .task:hover{ background: var(--taskFillHover); }
@@ -446,12 +446,12 @@ body{
   width: 4ch;
   min-width: 4ch;
   max-width: 30ch;
-  padding: 4px 6px;
-  border-radius: 8px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.10);
+  padding: 0;
+  border: none;
+  background: transparent;
   color: rgba(255,255,255,0.95);
   text-align: center;
+  outline: none;
 }
 .time::-webkit-outer-spin-button,
 .time::-webkit-inner-spin-button{ -webkit-appearance: none; margin: 0; }
@@ -534,3 +534,15 @@ body{
 
 button{ user-select:none; -webkit-user-select:none; }
 button:focus{ outline:none; }
+
+.list.card{ position:relative; }
+
+.panelActions{
+  position:absolute;
+  top: -56px;
+  right: 0;
+  display:flex;
+  gap: 10px;
+  align-items:center;
+  justify-content:flex-end;
+}
