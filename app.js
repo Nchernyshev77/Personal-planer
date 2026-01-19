@@ -23,7 +23,7 @@ function uid(){ return (crypto?.randomUUID?.() || String(Date.now()) + "-" + Mat
 /* ---------- Serialization ---------- */
 
 function serializeTasks(){
-  return JSON.stringify({ version: 5, updatedAt: nowISO(), tasks: state.tasks }, null, 2);
+  return JSON.stringify({ version: 6, updatedAt: nowISO(), tasks: state.tasks }, null, 2);
 }
 
 function deserialize(text){
@@ -392,11 +392,24 @@ function addSubtask(parentId){
 
 
 function toggleDone(id){
-  const t = state.tasks.find(x => x.id === id);
+  const t = getTask(id);
   if (!t) return;
-  t.done = !t.done;
+  const newDone = !t.done;
+  t.done = newDone;
   t.updatedAt = nowISO();
-  renderTaskById(id);
+
+  const stack = [id];
+  while(stack.length){
+    const pid = stack.pop();
+    for (const c of orderedChildren(pid)){
+      c.done = newDone;
+      c.updatedAt = nowISO();
+      stack.push(c.id);
+    }
+  }
+
+  renderAll();
+  renderTotal();
   debouncedSave();
 }
 
@@ -434,14 +447,38 @@ function parseHoursText(raw){
 }
 
 function setTaskHours(id, value){
-  const t = state.tasks.find(x => x.id === id);
+  const t = getTask(id);
   if (!t) return;
-  const p = parseHoursText(value);
-  t.hours = p.text;
-  t.updatedAt = nowISO();
+  const kids = orderedChildren(id);
+  const parsed = parseHoursText(value);
+
+  if (kids.length){
+    if (!parsed.text){
+      for (const c of kids){
+        c.hours = "";
+        c.updatedAt = nowISO();
+      }
+    }else{
+      const n = kids.length;
+      const minEach = parsed.min / n;
+      const maxEach = parsed.max / n;
+
+      for (const c of kids){
+        const text = (Math.abs(minEach - maxEach) < 1e-9)
+          ? String(round2(minEach))
+          : `${round2(minEach)}-${round2(maxEach)}`;
+        c.hours = text;
+        c.updatedAt = nowISO();
+      }
+    }
+  }else{
+    t.hours = parsed.text;
+    t.updatedAt = nowISO();
+  }
+
   renderAll();
   renderTotal();
-  saveAll("hours");
+  debouncedSave();
 }
 
 function removeTask(id){
@@ -533,6 +570,7 @@ function createTaskNode(t){
   node.dataset.id = t.id;
   node.dataset.parentId = t.parentId || "";
   node.style.setProperty("--depth", computeDepthById(t.id));
+  node.classList.toggle("subtask", !!t.parentId);
   node.classList.toggle("done", !!t.done);
   node.classList.add("tag-" + (t.tag || "none"));
 
@@ -580,7 +618,7 @@ function createTaskNode(t){
   const subZone = $(".subzone", node);
   timeInput.value = t.hours ? String(t.hours) : "";
   const hasKids = orderedChildren(t.id).length > 0;
-  timeInput.disabled = hasKids;
+  timeInput.disabled = false;
   autosizeTimeInput(timeInput);
   timeInput.addEventListener("input", () => { autosizeTimeInput(timeInput); renderTotal(); });
   timeInput.addEventListener("blur", () => setTaskHours(t.id, timeInput.value));
@@ -603,7 +641,7 @@ function renderAll(){
   recomputeAggregates();
 
   const tasks = flattenTasks();
-  if (empty) empty.hidden = true;
+  if (empty) empty.hidden = tasks.length !== 0;
 
   for (const t of tasks){
     list.appendChild(createTaskNode(t));
