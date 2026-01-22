@@ -675,7 +675,7 @@ function createTaskNode(t){
 
   // Time
   const timeInput = $(".time", node);
-  const subZone = $(".subzone", node);
+  const subZone = $(".subzoneHit", node);
   const collapseBtn = $(".collapse", node);
   const hiddenCount = $(".hiddenCount", node);
   timeInput.value = t.hours ? String(t.hours) : "";
