@@ -720,3 +720,13 @@ button:focus{ outline:none; }
   position: relative;
   z-index: 1;
 }
+
+/* ensure hover highlight works for subtasks too */
+.task.subtask:hover{
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.06) inset;
+}
+/* drag hover target */
+.task.dropTarget{
+  box-shadow: 0 0 0 1px rgba(65,165,140,0.35) inset;
+  background: rgba(65,165,140,0.06);
+}
