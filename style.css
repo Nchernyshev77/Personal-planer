@@ -623,63 +623,12 @@ button:focus{ outline:none; }
 
 
 
-.task.subtask::before{
-  content:"";
-  position:absolute;
-  left: -18px;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: rgba(255,255,255,0.10);
-}
-.task.subtask::after{
-  content:"";
-  position:absolute;
-  left: -18px;
-  top: 50%;
-  width: 12px;
-  height: 1px;
-  border-radius: 1px;
-  background: linear-gradient(90deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.14) 80%, rgba(255,255,255,0.0) 80%);
-  transform: translateY(-50%);
-}
 .task.subtask .timeWrap{ z-index: 2; }
 .task.subtask .text{ z-index: 2; }
-.task.subtask::after{
-  box-shadow: 10px 0 0 0 rgba(255,255,255,0.14);
-}
-.task.subtask::after{
-  /* arrow head */
-}
-
-.task.subtask::after{
-  box-shadow: 12px 0 0 0 rgba(255,255,255,0.18);
-}
 
 
-.task.subtask::after{
-  content:"";
-  position:absolute;
-  left: -22px;
-  top: 50%;
-  width: 14px;
-  height: 1px;
-  background: rgba(65,165,140,0.38);
-  transform: translateY(-50%);
-  z-index: 0;
-}
 
-.task.subtask::after{
-  content:"";
-  position:absolute;
-  left: -22px;
-  top: 50%;
-  width: 14px;
-  height: 1px;
-  background: rgba(65,165,140,0.38);
-  transform: translateY(-50%);
-  z-index: 0;
-}
+
 
 
 .colorbar[data-color="none"]{ background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.10); }
@@ -697,6 +646,16 @@ button:focus{ outline:none; }
   background: transparent;
   z-index: 1;
 }
+.task:hover .task:hover 
+
+/* add-subtask control (visible on hover, centered in task; click only right half) */
+.subzone{
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+}
 .task:hover .subzone{
   opacity: 1;
   background: linear-gradient(90deg, rgba(65,165,140,0.00) 0%, rgba(65,165,140,0.10) 40%, rgba(65,165,140,0.10) 60%, rgba(65,165,140,0.00) 100%);
@@ -706,52 +665,62 @@ button:focus{ outline:none; }
   left: 0;
   right: 0;
   top: 50%;
-  height: 34px;
   transform: translateY(-50%);
+  height: 22px;
   display:flex;
   align-items:center;
   justify-content:center;
-  color: rgba(255,255,255,0.55);
+  color: rgba(255,255,255,0.58);
   font-size: 12px;
   letter-spacing: 0.2px;
   opacity: 0;
   pointer-events: none;
-  z-index: 2;
+  z-index: 4;
 }
 .task:hover .subzoneLabel{ opacity: 1; }
 .subzoneHit{
   position: absolute;
   left: 50%;
   right: 0;
-  top: 50%;
-  height: 34px;
-  transform: translateY(-50%);
+  top: 0;
+  bottom: 0;
   border: none;
   background: transparent;
   opacity: 0;
-  z-index: 3;
+  z-index: 5;
 }
 .task:hover .subzoneHit{ opacity: 1; }
 
-/* connector lines for subtasks (green, connected) */
+.colorbar{
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: none !important;
+  box-shadow: none !important;
+  outline: none;
+}
+
+/* connector lines for subtasks: green L, stays outside task, continues only when there is next sibling */
 .task.subtask::before{
   content:"";
   position:absolute;
   left: -22px;
   top: -18px;
-  bottom: -18px;
   width: 1px;
-  background: rgba(65,165,140,0.40);
-  z-index: 0;
+  background: rgba(65,165,140,0.38);
+  z-index: 1;
+  bottom: -18px; /* overridden for last child */
+}
+.task.subtask.lastChild::before{
+  bottom: 50%;
 }
 .task.subtask::after{
   content:"";
   position:absolute;
   left: -22px;
   top: 50%;
-  width: 14px;
+  width: 22px;     /* ends exactly at task edge */
   height: 1px;
-  background: rgba(65,165,140,0.40);
+  background: rgba(65,165,140,0.38);
   transform: translateY(-50%);
-  z-index: 0;
+  z-index: 1;
 }

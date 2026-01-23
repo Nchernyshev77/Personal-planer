@@ -631,6 +631,13 @@ function createTaskNode(t){
   node.dataset.parentId = t.parentId || "";
   node.style.setProperty("--depth", computeDepthById(t.id));
   node.classList.toggle("subtask", !!t.parentId);
+  if (t.parentId){
+    const sibs = orderedChildren(t.parentId);
+    const isLast = sibs.length ? sibs[sibs.length-1].id === t.id : true;
+    node.classList.toggle("lastChild", isLast);
+  }else{
+    node.classList.remove("lastChild");
+  }
   node.classList.toggle("done", !!t.done);
   node.classList.add("tag-" + (t.tag || "none"));
 
