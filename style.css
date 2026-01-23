@@ -131,9 +131,11 @@ body{
 /* Inputs & buttons */
 .add-form{
   display:flex;
+  flex-direction: column;
   gap: 10px;
-  align-items:flex-start;
+  align-items: stretch;
 }
+
 
 .input{
   width:100%;
@@ -558,7 +560,7 @@ button:focus{ outline:none; }
 .task.subtask{
   padding: 6px 10px;
   min-height: 34px;
-  background: rgba(255,255,255,0.028);
+  background: rgba(255,255,255,0.055);
 }
 
 .task.subtask .text{
@@ -582,8 +584,7 @@ button:focus{ outline:none; }
   opacity: 0;
   pointer-events: none;
 }
-.task.hasKids:hover .collapse,
-.task.hasKids.collapsed .collapse{
+.task.hasKids .collapse{
   opacity: 1;
   pointer-events: auto;
 }
@@ -652,4 +653,14 @@ button:focus{ outline:none; }
 }
 .subzoneHit:hover{
   color: rgba(255,255,255,0.88);
+}
+
+.add-form .btn{
+  align-self: center;
+  min-width: 160px;
+}
+
+.task.hasKids .collapse{
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
