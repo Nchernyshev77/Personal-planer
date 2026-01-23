@@ -131,9 +131,8 @@ body{
 /* Inputs & buttons */
 .add-form{
   display:flex;
-  flex-direction: column;
   gap: 10px;
-  align-items: stretch;
+  align-items: flex-start;
 }
 
 
@@ -373,7 +372,7 @@ position:relative;
   background: rgba(255,255,255,0.05);
   cursor:pointer;
 }
-.pcolor[data-color="none"]{ background: linear-gradient(90deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.14) 80%, rgba(255,255,255,0.0) 80%); }
+.pcolor[data-color="none"]{ background: rgba(255,255,255,0.10); }
 .pcolor[data-color="blue"]{ background: var(--blue); border-color: rgba(59,130,246,0.35); }
 .pcolor[data-color="yellow"]{ background: var(--yellow); border-color: rgba(245,158,11,0.35); }
 .pcolor[data-color="red"]{ background: var(--red); border-color: rgba(239,68,68,0.35); }
@@ -616,10 +615,6 @@ button:focus{ outline:none; }
 }
 
 
-.add-form .btn{
-  align-self: center;
-  min-width: 160px;
-}
 
 .task.hasKids .collapse{
   opacity: 1 !important;
@@ -662,6 +657,42 @@ button:focus{ outline:none; }
   box-shadow: 12px 0 0 0 rgba(255,255,255,0.18);
 }
 
+
+.task.subtask::after{
+  content:"";
+  position:absolute;
+  left: -22px;
+  top: 50%;
+  width: 14px;
+  height: 1px;
+  background: rgba(65,165,140,0.38);
+  transform: translateY(-50%);
+  z-index: 0;
+}
+
+/* connector lines for subtasks (green, continuous L) */
+.task.subtask::before{
+  content:"";
+  position:absolute;
+  left: -22px;
+  top: 0;
+  bottom: 50%;
+  width: 1px;
+  background: rgba(65,165,140,0.38);
+  z-index: 0;
+}
+.task.subtask::after{
+  content:"";
+  position:absolute;
+  left: -22px;
+  top: 50%;
+  width: 14px;
+  height: 1px;
+  background: rgba(65,165,140,0.38);
+  transform: translateY(-50%);
+  z-index: 0;
+}
+
 /* subtask add zone: glow full width, label centered, click area only right half */
 .subzone{
   position: absolute;
@@ -672,6 +703,7 @@ button:focus{ outline:none; }
   opacity: 0;
   pointer-events: none;
   background: transparent;
+  z-index: 1;
 }
 .task:hover .subzone{
   opacity: 1;
@@ -691,6 +723,7 @@ button:focus{ outline:none; }
   letter-spacing: 0.2px;
   opacity: 0;
   pointer-events: none;
+  z-index: 2;
 }
 .task:hover .subzoneLabel{ opacity: 1; }
 .subzoneHit{
@@ -702,32 +735,6 @@ button:focus{ outline:none; }
   border: none;
   background: transparent;
   opacity: 0;
+  z-index: 3;
 }
 .task:hover .subzoneHit{ opacity: 1; }
-/* brighten label when hovering right half */
-.task:hover .subzoneHit:hover ~ .subzoneLabel{
-  color: rgba(255,255,255,0.92);
-}
-
-/* connector lines for subtasks (green, continuous L) */
-.task.subtask::before{
-  content:"";
-  position:absolute;
-  left: -22px;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: rgba(65,165,140,0.30);
-  z-index: 0;
-}
-.task.subtask::after{
-  content:"";
-  position:absolute;
-  left: -22px;
-  top: 50%;
-  width: 14px;
-  height: 1px;
-  background: rgba(65,165,140,0.38);
-  transform: translateY(-50%);
-  z-index: 0;
-}
