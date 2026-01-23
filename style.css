@@ -152,13 +152,14 @@ body{
 .input:focus{ border-color: rgba(16,163,127,0.7); }
 
 .textarea{
-  min-height: 46px;
+min-height: 46px;
   resize: none;
   line-height: 1.35;
   font-family: var(--font);
   font-size: 14px;
-}  overflow: hidden;
+  overflow: hidden;
 }
+
 
 .input.small{
   padding: 8px 10px;
@@ -648,33 +649,6 @@ button:focus{ outline:none; }
 
 .task:hover .task:hover .subzoneHit:hover + 
 
-/* connector lines (CSS): green L-shape in indent area */
-.task.subtask::before{
-  content:"";
-  position:absolute;
-  left: calc(-1 * var(--indent) + 8px); /* inside indent column */
-  top: -14px;
-  bottom: -14px;
-  width: 1px;
-  background: rgba(65,165,140,0.38);
-  pointer-events:none;
-  z-index: 1;
-}
-.task.subtask.firstChild::before{ top: 50%; }
-.task.subtask.lastChild::before{ bottom: 50%; }
-
-.task.subtask::after{
-  content:"";
-  position:absolute;
-  left: calc(-1 * var(--indent) + 8px);
-  top: 50%;
-  width: calc(var(--indent) - 8px); /* ends at card edge (x=0) */
-  height: 1px;
-  background: rgba(65,165,140,0.38);
-  transform: translateY(-50%);
-  pointer-events:none;
-  z-index: 1;
-}
 
 /* add-subtask: bottom strip glow; label centered at bottom; click only right half */
 .subzone{
@@ -726,4 +700,32 @@ button:focus{ outline:none; }
 .task:hover .subzoneLabel{ opacity:1; }
 .task:hover .subzoneHit:hover + .subzoneLabel{
   color: rgba(255,255,255,0.92);
+}
+
+/* connector lines (CSS): green L-shape in indent area, connected across siblings */
+.task.subtask::before{
+  content:"";
+  position:absolute;
+  left: calc(-1 * var(--indent) + 8px);
+  top: -20px;
+  bottom: -20px;
+  width: 1px;
+  background: rgba(65,165,140,0.40);
+  pointer-events:none;
+  z-index: 1;
+}
+.task.subtask.firstChild::before{ top: 50%; }
+.task.subtask.lastChild::before{ bottom: 50%; }
+
+.task.subtask::after{
+  content:"";
+  position:absolute;
+  left: calc(-1 * var(--indent) + 8px);
+  top: 50%;
+  width: calc(var(--indent) - 8px); /* ends at card edge (x=0) */
+  height: 1px;
+  background: rgba(65,165,140,0.40);
+  transform: translateY(-50%);
+  pointer-events:none;
+  z-index: 1;
 }
