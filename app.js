@@ -781,17 +781,11 @@ function renderConnectors(){
     const parentEdge = pRect ? (pRect.left - stageRect.left) : null;
     const yMin = Math.min(...mids);
     const yMax = Math.max(...mids);
-    // vertical: connect siblings, plus connect parent->children
-    if (kids.length > 1){
-      svg.appendChild(mkLine(xVert, yMin, xVert, yMax));
-    }
-    if (parentMid != null){
-      // connect from parent to the children group
-      const yTop = Math.min(parentMid, yMin);
-      const yBot = Math.max(parentMid, yMax);
-      svg.appendChild(mkLine(xVert, yTop, xVert, yBot));
-      // small horizontal to parent edge (stops at card edge)
-      svg.appendChild(mkLine(xVert, parentMid, parentEdge, parentMid));
+
+    // single vertical trunk: children group + (optionally) parent
+    let y1 = yMin;
+    let y2 = yMax;    if (y2 - y1 >= 0.5){
+      svg.appendChild(mkLine(xVert, y1, xVert, y2));
     }
 
     for (let i=0;i<kids.length;i++){
@@ -1193,26 +1187,21 @@ window.addEventListener("load", () => {
 });
 window.addEventListener("resize", () => requestAnimationFrame(renderConnectors));
 
+
 // drop target highlight (when making a task a subtask by dropping on another)
 (function(){
-  const list = document.getElementById("tasks");
-  if (!list) return;
   let last = null;
-  list.addEventListener("dragover", (e) => {
-    const t = e.target && e.target.closest ? e.target.closest(".task") : null;
-    if (!t || t.classList.contains("dragging")) return;
+  const clear = () => {
+    if (last){ last.classList.remove("dropTarget"); last = null; }
+  };
+  document.addEventListener("dragover", (e) => {
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const t = el && el.closest ? el.closest(".task") : null;
+    if (!t || t.classList.contains("dragging")) { clear(); return; }
     if (last && last !== t) last.classList.remove("dropTarget");
     last = t;
     t.classList.add("dropTarget");
-  });
-  list.addEventListener("dragleave", (e) => {
-    // when leaving the list area
-    if (e.target === list && last){
-      last.classList.remove("dropTarget");
-      last = null;
-    }
-  });
-  list.addEventListener("drop", () => {
-    if (last){ last.classList.remove("dropTarget"); last = null; }
-  });
+  }, {passive:true});
+  document.addEventListener("drop", clear);
+  document.addEventListener("dragend", clear);
 })();
