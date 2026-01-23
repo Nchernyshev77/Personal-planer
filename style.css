@@ -702,30 +702,21 @@ button:focus{ outline:none; }
   color: rgba(255,255,255,0.92);
 }
 
-/* connector lines (CSS): green L-shape in indent area, connected across siblings */
-.task.subtask::before{
-  content:"";
-  position:absolute;
-  left: calc(-1 * var(--indent) + 8px);
-  top: -20px;
-  bottom: -20px;
-  width: 1px;
-  background: rgba(65,165,140,0.40);
-  pointer-events:none;
-  z-index: 1;
-}
-.task.subtask.firstChild::before{ top: 50%; }
-.task.subtask.lastChild::before{ bottom: 50%; }
 
-.task.subtask::after{
-  content:"";
+/* connectors (SVG) */
+.tasksStage{
+  position: relative;
+}
+.connectors{
   position:absolute;
-  left: calc(-1 * var(--indent) + 8px);
-  top: 50%;
-  width: calc(var(--indent) - 8px); /* ends at card edge (x=0) */
-  height: 1px;
-  background: rgba(65,165,140,0.40);
-  transform: translateY(-50%);
-  pointer-events:none;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  display: block;
+}
+#tasks{
+  position: relative;
   z-index: 1;
 }

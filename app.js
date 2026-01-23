@@ -721,6 +721,72 @@ function createTaskNode(t){
   return node;
 }
 
+
+function renderConnectors(){
+  const stage = document.querySelector(".tasksStage");
+  const svg = document.getElementById("connLayer");
+  const list = document.getElementById("tasks");
+  if (!stage || !svg || !list) return;
+
+  const stageRect = stage.getBoundingClientRect();
+  const w = stage.clientWidth;
+  const h = stage.clientHeight;
+  svg.setAttribute("width", String(w));
+  svg.setAttribute("height", String(h));
+  svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+  svg.innerHTML = "";
+
+  const nodes = Array.from(list.querySelectorAll(".task"));
+  const childrenByParent = new Map();
+
+  for (const n of nodes){
+    const pid = n.dataset.parentId || "";
+    if (!pid) continue;
+    if (!childrenByParent.has(pid)) childrenByParent.set(pid, []);
+    childrenByParent.get(pid).push(n);
+  }
+
+  const indentStr = getComputedStyle(document.documentElement).getPropertyValue("--indent").trim();
+  const indent = Math.max(16, parseFloat(indentStr) || 26);
+  const xInset = 8;
+  const stroke = "rgba(65,165,140,0.42)";
+  const sw = 1;
+
+  const mkLine = (x1,y1,x2,y2) => {
+    const ln = document.createElementNS("http://www.w3.org/2000/svg","line");
+    ln.setAttribute("x1", String(x1));
+    ln.setAttribute("y1", String(y1));
+    ln.setAttribute("x2", String(x2));
+    ln.setAttribute("y2", String(y2));
+    ln.setAttribute("stroke", stroke);
+    ln.setAttribute("stroke-width", String(sw));
+    ln.setAttribute("shape-rendering", "crispEdges");
+    ln.setAttribute("stroke-linecap", "square");
+    return ln;
+  };
+
+  for (const [pid, kids] of childrenByParent.entries()){
+    const rects = kids.map(k => k.getBoundingClientRect());
+    const mids = rects.map(r => (r.top - stageRect.top) + r.height/2);
+
+    const first = rects[0];
+    const xEdge = (first.left - stageRect.left);
+    const xVert = Math.max(2, xEdge - indent + xInset);
+    const xEnd  = xEdge;
+
+    if (kids.length > 1){
+      const y1 = Math.min(...mids);
+      const y2 = Math.max(...mids);
+      svg.appendChild(mkLine(xVert, y1, xVert, y2));
+    }
+
+    for (let i=0;i<kids.length;i++){
+      const y = mids[i];
+      svg.appendChild(mkLine(xVert, y, xEnd, y));
+    }
+  }
+}
+
 function renderAll(){
   const list = $("#tasks");
   const empty = $("#empty");
@@ -735,7 +801,9 @@ for (const t of tasks){
     list.appendChild(createTaskNode(t));
   }
   renderTotal();
+  requestAnimationFrame(renderConnectors);
 }
+
 
 function renderTaskById(id){
   const node = $(`.task[data-id="${CSS.escape(id)}"]`);
@@ -1102,3 +1170,11 @@ init();
 
 
 
+
+const __connRO = new ResizeObserver(() => requestAnimationFrame(renderConnectors));
+window.addEventListener("load", () => {
+  const stage = document.querySelector(".tasksStage");
+  if (stage) __connRO.observe(stage);
+  requestAnimationFrame(renderConnectors);
+});
+window.addEventListener("resize", () => requestAnimationFrame(renderConnectors));
