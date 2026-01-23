@@ -560,7 +560,8 @@ button:focus{ outline:none; }
 .task.subtask{
   padding: 6px 10px;
   min-height: 34px;
-  background: rgba(255,255,255,0.055);
+  background: rgba(255,255,255,0.10);
+  border-color: rgba(255,255,255,0.16);
 }
 
 .task.subtask .text{
@@ -614,46 +615,6 @@ button:focus{ outline:none; }
   user-select: none;
 }
 
-/* subtask add zone: glow across full width, click area only right half */
-.subzone{
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 18px;
-  opacity: 0;
-  pointer-events: none;
-  background: transparent;
-}
-.task:hover .subzone{
-  opacity: 1;
-}
-.task:hover .subzone{
-  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(65,165,140,0.12) 100%);
-}
-.subzoneHit{
-  position: absolute;
-  left: 50%;
-  right: 0;
-  bottom: 0;
-  height: 18px;
-  border: none;
-  background: transparent;
-  color: rgba(255,255,255,0.52);
-  font-size: 12px;
-  letter-spacing: 0.2px;
-  opacity: 0;
-  display:flex;
-  align-items:flex-start;
-  justify-content:center;
-  padding-top: 2px;
-}
-.task:hover .subzoneHit{
-  opacity: 1;
-}
-.subzoneHit:hover{
-  color: rgba(255,255,255,0.88);
-}
 
 .add-form .btn{
   align-self: center;
@@ -663,4 +624,45 @@ button:focus{ outline:none; }
 .task.hasKids .collapse{
   opacity: 1 !important;
   pointer-events: auto !important;
+}
+
+/* subtask add zone: glow across full width, click area only right half (text centered in task) */
+.subzone{
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 34px;
+  transform: translateY(-50%);
+  opacity: 0;
+  pointer-events: none;
+  background: transparent;
+}
+.task:hover .subzone{
+  opacity: 1;
+  background: linear-gradient(90deg, rgba(65,165,140,0.00) 0%, rgba(65,165,140,0.10) 40%, rgba(65,165,140,0.10) 60%, rgba(65,165,140,0.00) 100%);
+}
+.subzoneHit{
+  position: absolute;
+  left: 50%;
+  right: 0;
+  top: 50%;
+  height: 34px;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.55);
+  font-size: 12px;
+  letter-spacing: 0.2px;
+  opacity: 0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 0;
+}
+.task:hover .subzoneHit{
+  opacity: 1;
+}
+.subzoneHit:hover{
+  color: rgba(255,255,255,0.92);
 }
