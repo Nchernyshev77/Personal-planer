@@ -627,43 +627,8 @@ button:focus{ outline:none; }
 }
 
 
-/* subtask add zone: glow across full width, click area only right half (bottom center text) */
-.subzone{
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 18px;
-  opacity: 0;
-  pointer-events: none;
-  background: transparent;
-}
-.task:hover .subzone{
-  opacity: 1;
-  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(65,165,140,0.12) 100%);
-}
-.subzoneHit{
-  position: absolute;
-  left: 50%;
-  right: 0;
-  bottom: 0;
-  height: 18px;
-  border: none;
-  background: transparent;
-  color: rgba(255,255,255,0.55);
-  font-size: 12px;
-  letter-spacing: 0.2px;
-  opacity: 0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding: 0;
-}
-.task:hover .subzoneHit{ opacity: 1; }
-.subzoneHit:hover{ color: rgba(255,255,255,0.92); }
 
 
-/* connector arrows for subtasks (left indentation area) */
 .task.subtask::before{
   content:"";
   position:absolute;
@@ -695,4 +660,74 @@ button:focus{ outline:none; }
 
 .task.subtask::after{
   box-shadow: 12px 0 0 0 rgba(255,255,255,0.18);
+}
+
+/* subtask add zone: glow full width, label centered, click area only right half */
+.subzone{
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 18px;
+  opacity: 0;
+  pointer-events: none;
+  background: transparent;
+}
+.task:hover .subzone{
+  opacity: 1;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(65,165,140,0.12) 100%);
+}
+.subzoneLabel{
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color: rgba(255,255,255,0.55);
+  font-size: 12px;
+  letter-spacing: 0.2px;
+  opacity: 0;
+  pointer-events: none;
+}
+.task:hover .subzoneLabel{ opacity: 1; }
+.subzoneHit{
+  position: absolute;
+  left: 50%;
+  right: 0;
+  bottom: 0;
+  height: 18px;
+  border: none;
+  background: transparent;
+  opacity: 0;
+}
+.task:hover .subzoneHit{ opacity: 1; }
+/* brighten label when hovering right half */
+.task:hover .subzoneHit:hover ~ .subzoneLabel{
+  color: rgba(255,255,255,0.92);
+}
+
+/* connector lines for subtasks (green, continuous L) */
+.task.subtask::before{
+  content:"";
+  position:absolute;
+  left: -22px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(65,165,140,0.30);
+  z-index: 0;
+}
+.task.subtask::after{
+  content:"";
+  position:absolute;
+  left: -22px;
+  top: 50%;
+  width: 14px;
+  height: 1px;
+  background: rgba(65,165,140,0.38);
+  transform: translateY(-50%);
+  z-index: 0;
 }
