@@ -782,10 +782,14 @@ function renderConnectors(){
     const yMin = Math.min(...mids);
     const yMax = Math.max(...mids);
 
-    // single vertical trunk: children group + (optionally) parent
-    let y1 = yMin;
-    let y2 = yMax;    if (y2 - y1 >= 0.5){
-      svg.appendChild(mkLine(xVert, y1, xVert, y2));
+    // vertical trunk: children + parent (if exists)
+    if (parentMid != null){
+      const yTop = Math.min(parentMid, yMin);
+      const yBot = Math.max(parentMid, yMax);
+      svg.appendChild(mkLine(xVert, yTop, xVert, yBot));
+    } else {
+      // no parent visible: draw only within children group
+      if (yMax - yMin >= 0.5) svg.appendChild(mkLine(xVert, yMin, xVert, yMax));
     }
 
     for (let i=0;i<kids.length;i++){
