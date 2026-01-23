@@ -1165,3 +1165,7 @@ function renderConnectors(){
     svg.appendChild(p);
   }
 }
+
+window.addEventListener("resize", () => {
+  requestAnimationFrame(renderConnectors);
+});

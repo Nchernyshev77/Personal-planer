@@ -633,46 +633,20 @@ button:focus{ outline:none; }
 
 .colorbar[data-color="none"]{ background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.10); }
 
-/* subtask add zone: glow full width, label centered in task, click area only right half */
-.subzone{
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 34px;
-  transform: translateY(-50%);
-  opacity: 0;
-  pointer-events: none;
-  background: transparent;
-  z-index: 1;
-}
 .task:hover .task:hover 
 
-/* add-subtask control (visible on hover, centered in task; click only right half) */
-.subzone{
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 3;
-}
-.task:hover .subzone{
-  opacity: 1;
-  background: linear-gradient(90deg, rgba(65,165,140,0.00) 0%, rgba(65,165,140,0.10) 40%, rgba(65,165,140,0.10) 60%, rgba(65,165,140,0.00) 100%);
-}
 
-.colorbar{
-  appearance: none;
-  -webkit-appearance: none;
+.pcolor[data-color="none"]{
+  background: rgba(255,255,255,0.11) !important;
   background-image: none !important;
   box-shadow: none !important;
-  outline: none;
 }
 
-
-#tasks{ position: relative; }
-
-#connectors{
+/* connectors overlay */
+.tasksWrap{
+  position: relative;
+}
+.connectors{
   position:absolute;
   inset: 0;
   width: 100%;
@@ -680,58 +654,59 @@ button:focus{ outline:none; }
   pointer-events: none;
   z-index: 0;
 }
-#connectors path{
-  stroke: rgba(65,165,140,0.42);
-  stroke-width: 1;
-  fill: none;
-  shape-rendering: crispEdges;
+#tasks{
+  position: relative;
+  z-index: 1;
 }
-.task{ z-index: 1; }
 
+/* add-subtask: bottom strip glow; label centered at bottom; click only right half */
 .subzone{
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 3;
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:18px;
+  opacity:0;
+  pointer-events:none;
+  background: transparent;
+  z-index: 2;
 }
 .task:hover .subzone{
-  opacity: 1;
-  background: linear-gradient(90deg, rgba(65,165,140,0.00) 0%, rgba(65,165,140,0.10) 40%, rgba(65,165,140,0.10) 60%, rgba(65,165,140,0.00) 100%);
+  opacity:1;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(65,165,140,0.12) 100%);
 }
+.subzoneHit{
+  position:absolute;
+  left:50%;
+  right:0;
+  bottom:0;
+  height:18px;
+  border:none;
+  background: transparent;
+  opacity:0;
+  z-index: 3;
+  cursor: pointer;
+}
+.task:hover .subzoneHit{ opacity: 1; }
+.subzoneHit:active{ transform: translateY(1px); }
+
 .subzoneLabel{
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 22px;
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:18px;
   display:flex;
   align-items:center;
   justify-content:center;
-  color: rgba(255,255,255,0.58);
-  font-size: 12px;
-  letter-spacing: 0.2px;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 4;
+  color: rgba(255,255,255,0.55);
+  font-size:12px;
+  letter-spacing:0.2px;
+  opacity:0;
+  pointer-events:none;
+  z-index: 2;
 }
-.task:hover .subzoneLabel{ opacity: 1; }
-.subzoneHit{
-  position: absolute;
-  left: 50%;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  border: none;
-  background: transparent;
-  opacity: 0;
-  z-index: 5;
-}
-.task:hover .subzoneHit{ opacity: 1; }
-
-.pcolor[data-color="none"]{
-  background: rgba(255,255,255,0.11) !important;
-  background-image: none !important;
-  box-shadow: none !important;
+.task:hover .subzoneLabel{ opacity:1; }
+.task:hover .subzoneHit:hover + .subzoneLabel{
+  color: rgba(255,255,255,0.90);
 }
