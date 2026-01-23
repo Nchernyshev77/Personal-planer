@@ -721,6 +721,7 @@ function renderAll(){
 
   const tasks = flattenTasks();
   if (empty) empty.hidden = tasks.length !== 0;
+  renderConnectors();
 
   for (const t of tasks){
     list.appendChild(createTaskNode(t));
@@ -1090,3 +1091,77 @@ async function init(){
 
 
 init();
+
+
+function renderConnectors(){
+  const host = document.getElementById("tasks");
+  if (!host) return;
+
+  let svg = document.getElementById("connectors");
+  if (!svg){
+    svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+    svg.setAttribute("id","connectors");
+    svg.setAttribute("aria-hidden","true");
+    host.prepend(svg);
+  }
+
+  // size to content
+  const w = host.scrollWidth;
+  const h = host.scrollHeight;
+  svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+  svg.setAttribute("preserveAspectRatio","none");
+
+  // build maps
+  const els = Array.from(host.querySelectorAll(".task"));
+  const byId = new Map();
+  for (const el of els){
+    const id = el.dataset.id;
+    if (!id) continue;
+    byId.set(id, el);
+  }
+
+  // Clear
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+
+  // children map preserving current order (DOM order mirrors flattenTasks order)
+  const children = new Map();
+  for (const t of state.tasks){
+    if (!t.parentId) continue;
+    if (!children.has(t.parentId)) children.set(t.parentId, []);
+    children.get(t.parentId).push(t.id);
+  }
+
+  // helper for coords
+  const cx = (el) => el.offsetLeft;
+  const cy = (el) => el.offsetTop + el.offsetHeight/2;
+
+  const PATHS = [];
+  for (const [pid, kids] of children.entries()){
+    const kidEls = kids.map(id => byId.get(id)).filter(Boolean);
+    if (!kidEls.length) continue;
+
+    // gutter x based on first child position (outside card)
+    const xEnd = cx(kidEls[0]);
+    const xG = Math.max(0, xEnd - 22);
+
+    const ys = kidEls.map(cy).sort((a,b)=>a-b);
+    const y1 = ys[0];
+    const y2 = ys[ys.length-1];
+
+    if (ys.length > 1){
+      PATHS.push(`M ${xG} ${y1} L ${xG} ${y2}`);
+    }
+
+    for (const el of kidEls){
+      const y = cy(el);
+      const xTo = cx(el); // card edge
+      PATHS.push(`M ${xG} ${y} L ${xTo} ${y}`);
+    }
+  }
+
+  for (const d of PATHS){
+    const p = document.createElementNS("http://www.w3.org/2000/svg","path");
+    p.setAttribute("d", d);
+    svg.appendChild(p);
+  }
+}
