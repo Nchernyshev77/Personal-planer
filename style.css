@@ -710,3 +710,11 @@ button:focus{ outline:none; }
 .task:hover .subzoneHit:hover + .subzoneLabel{
   color: rgba(255,255,255,0.90);
 }
+
+.connectors{
+  display:block;
+  overflow: visible;
+}
+.tasksWrap{
+  overflow: visible;
+}

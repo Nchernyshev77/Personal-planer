@@ -721,9 +721,8 @@ function renderAll(){
 
   const tasks = flattenTasks();
   if (empty) empty.hidden = tasks.length !== 0;
-  renderConnectors();
-
-  for (const t of tasks){
+  requestAnimationFrame(renderConnectors);
+for (const t of tasks){
     list.appendChild(createTaskNode(t));
   }
   renderTotal();
