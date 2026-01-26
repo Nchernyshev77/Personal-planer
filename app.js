@@ -966,12 +966,15 @@ function pointerMove(e){
     const wantsSub = e.clientX > indentThreshold;
 
     if (wantsSub){
-      dragState.newParentId = overId;
-      const last = findLastDescendantEl(overTask);
+      const parentEl = resolveRootTaskEl(overTask);
+      const parentId = parentEl ? parentEl.dataset.id : overId;
+      dragState.newParentId = parentId;
+      const last = findLastDescendantEl(parentEl || overTask);
       if (dragState.placeholder !== last.nextElementSibling){
         list.insertBefore(dragState.placeholder, last.nextElementSibling);
       }
-      dragState.placeholder.style.setProperty("--depth", overDepth + 1);
+      const baseDepth = computeDepthById(parentId);
+      dragState.placeholder.style.setProperty("--depth", baseDepth + 1);
     }else{
       dragState.newParentId = overParent;
       const midY = overRect.top + overRect.height/2;
