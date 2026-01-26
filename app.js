@@ -692,6 +692,7 @@ function createTaskNode(t){
   // Time
   const timeInput = $(".time", node);
   const subZone = $(".subzoneHit", node);
+  node.classList.toggle("noSubAdd", !!t.parentId);
   const collapseBtn = $(".collapse", node);
   const hiddenCount = $(".hiddenCount", node);
   timeInput.value = t.hours ? String(t.hours) : "";
@@ -707,7 +708,7 @@ function createTaskNode(t){
 
   $(".del", node).addEventListener("click", () => removeTask(t.id));
 
-  if (subZone){
+  if (subZone && !t.parentId){
     subZone.addEventListener("click", (e) => { e.stopPropagation(); addSubtask(t.id); });
     subZone.addEventListener("pointerdown", (e) => e.stopPropagation());
   }

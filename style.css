@@ -743,3 +743,16 @@ button:focus{ outline:none; }
   box-shadow: 0 0 0 1px rgba(65,165,140,0.35) inset;
   background: rgba(65,165,140,0.06);
 }
+
+/* v41: make +subtask zone reliably clickable and visible */
+.task .subzone{ z-index: 6; }
+.task .subzoneLabel{ z-index: 7; }
+.task .subzoneHit{ z-index: 8; pointer-events: auto; }
+.task:hover .subzoneHit{ opacity: 1; }
+
+/* Only top-level tasks can add subtasks */
+.task.noSubAdd .subzone,
+.task.noSubAdd .subzoneLabel,
+.task.noSubAdd .subzoneHit{
+  display: none !important;
+}
