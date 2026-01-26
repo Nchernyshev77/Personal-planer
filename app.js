@@ -772,20 +772,20 @@ function renderConnectors(){
     const first = rects[0];
     const xEdge = (first.left - stageRect.left);
     const xVert = Math.max(2, xEdge - 18);
-    const xEnd  = xEdge;
+    const xEnd  = Math.max(0, xEdge - 1);
 
     // parent connection
     const pNode = list.querySelector(`.task[data-id="${pid}"]`);
     const pRect = pNode ? pNode.getBoundingClientRect() : null;
-    const parentMid = pRect ? (pRect.top - stageRect.top) + pRect.height/2 : null;
+    const parentBottom = pRect ? (pRect.bottom - stageRect.top) - 0.5 : null;
     const parentEdge = pRect ? (pRect.left - stageRect.left) : null;
     const yMin = Math.min(...mids);
     const yMax = Math.max(...mids);
 
     // vertical trunk: children + parent (if exists)
-    if (parentMid != null){
-      const yTop = Math.min(parentMid, yMin);
-      const yBot = Math.max(parentMid, yMax);
+    if (parentBottom != null){
+      const yTop = Math.min(parentBottom, yMin);
+      const yBot = Math.max(parentBottom, yMax);
       svg.appendChild(mkLine(xVert, yTop, xVert, yBot));
     } else {
       // no parent visible: draw only within children group
