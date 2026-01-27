@@ -611,7 +611,7 @@ function renderTotal(){
     const v = r2(x);
     const i = Math.trunc(v);
     const frac = Math.abs(v - i);
-    // If fractional part starts with 0 (e.g., 10.01, 8.04) -> show integer
+    // v44: if fractional part is 0.xx (e.g., 10.01, 8.04) show integer
     if (frac > 1e-9 && frac < 0.1) return String(i);
     return String(v);
   };
@@ -1021,14 +1021,6 @@ function pointerMove(e){
   }
 }
 
-async 
-function getDescendantElsInDom(ancestorId){
-  const list = $("#tasks");
-  if (!list) return [];
-  const els = [...list.querySelectorAll(".task")];
-  return els.filter(el => el.dataset.id && isDescendantOf(el.dataset.id, ancestorId));
-}
-
 async function pointerUp(e){
   if (!dragState || e.pointerId !== dragState.pointerId) return;
   dragState.cleanup?.();
@@ -1059,15 +1051,6 @@ async function pointerUp(e){
   dragState.placeholder.remove();
   animateFLIP(first);
 
-  // If dragging a task with subtasks, keep the group together in DOM order
-  const movedDesc = getDescendantElsInDom(dragState.id);
-  if (movedDesc.length){
-    const after = dragState.taskEl.nextSibling;
-    for (const el of movedDesc){
-      list.insertBefore(el, after);
-    }
-  }
-
   // Wait and clean
   try{ await ghostAnim.finished; }catch{}
   dragState.ghost.remove();
@@ -1081,10 +1064,10 @@ async function pointerUp(e){
     moved.parentId = newPid;
     moved.updatedAt = nowISO();
 
-    // Prevent sub-subtasks: if moved task has descendants, re-parent them to the same new parent
+    // v44: when moving a task that has subtasks under another task, flatten its subtasks to the new parent
     if (newPid){
       for (const t of state.tasks){
-        if (t.id !== moved.id && isDescendantOf(t.id, moved.id)){
+        if (t.parentId === moved.id || isDescendantOf(t.id, moved.id)){
           t.parentId = newPid;
           t.updatedAt = nowISO();
         }
