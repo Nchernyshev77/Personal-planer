@@ -842,3 +842,12 @@ button:focus{ outline:none; }
 
 /* remove spacing between subtasks: only groups separated */
 .tasks{ gap: 0 !important; }
+
+/* v49: adjust glow + subtask tone */
+.task:not(.subtask)::after{
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(37,120,95,0.26) 100%) !important;
+  border-bottom: 1px solid rgba(37,120,95,0.40) !important;
+}
+.task.subtask{
+  background: rgba(255,255,255,0.040) !important; /* slightly darker than main */
+}
