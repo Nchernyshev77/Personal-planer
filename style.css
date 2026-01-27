@@ -799,3 +799,46 @@ button:focus{ outline:none; }
 .task.subtask .subzone,
 .task.subtask .subzoneHit,
 .task.subtask .subzoneLabel{ display:none !important; }
+
+/* v48: task colors - main lighter, subtasks darker */
+.task{
+  isolation: isolate; /* fix stacking so hover glow is visible */
+}
+.task:not(.subtask){
+  background: rgba(255,255,255,0.055) !important;
+}
+.task.subtask{
+  background: rgba(0,0,0,0.18) !important;
+}
+
+/* v48: stronger hover highlight for main tasks */
+.task:not(.subtask):hover{
+  background: rgba(255,255,255,0.085) !important;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.07) inset !important;
+}
+
+/* v48: bottom green glow as pseudo-element (cannot be covered by inner layers) */
+.task:not(.subtask)::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height: 26px;
+  opacity: 0;
+  pointer-events:none;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(65,165,140,0.22) 100%);
+  border-bottom: 1px solid rgba(65,165,140,0.32);
+  z-index: 20;
+  transition: opacity .12s ease;
+}
+.task:not(.subtask):hover::after{
+  opacity: 1;
+}
+
+/* keep subtask add click zone above glow */
+.task:not(.subtask) .subzoneHit{ z-index: 30 !important; opacity: 1 !important; }
+.task:not(.subtask) .subzoneLabel{ z-index: 31 !important; }
+
+/* remove spacing between subtasks: only groups separated */
+.tasks{ gap: 0 !important; }
