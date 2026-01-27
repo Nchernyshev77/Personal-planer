@@ -606,12 +606,20 @@ function renderTotal(){
   const el = $("#totalTime");
   if (!el) return;
 
-  const r = (x) => Math.round(x * 100) / 100;
+  const r2 = (x) => Math.round(x * 100) / 100;
+  const fmt = (x) => {
+    const v = r2(x);
+    const i = Math.trunc(v);
+    const frac = Math.abs(v - i);
+    // If fractional part starts with 0 (e.g., 10.01, 8.04) -> show integer
+    if (frac > 1e-9 && frac < 0.1) return String(i);
+    return String(v);
+  };
 
   if (!hasRange && Math.abs(minSum - maxSum) < 1e-9){
-    el.textContent = `${r(minSum)} ч`;
+    el.textContent = `${fmt(minSum)} ч`;
   }else{
-    el.textContent = `${r(minSum)}-${r(maxSum)} ч`;
+    el.textContent = `${fmt(minSum)}-${fmt(maxSum)} ч`;
   }
 }
 
@@ -1013,6 +1021,14 @@ function pointerMove(e){
   }
 }
 
+async 
+function getDescendantElsInDom(ancestorId){
+  const list = $("#tasks");
+  if (!list) return [];
+  const els = [...list.querySelectorAll(".task")];
+  return els.filter(el => el.dataset.id && isDescendantOf(el.dataset.id, ancestorId));
+}
+
 async function pointerUp(e){
   if (!dragState || e.pointerId !== dragState.pointerId) return;
   dragState.cleanup?.();
@@ -1043,6 +1059,15 @@ async function pointerUp(e){
   dragState.placeholder.remove();
   animateFLIP(first);
 
+  // If dragging a task with subtasks, keep the group together in DOM order
+  const movedDesc = getDescendantElsInDom(dragState.id);
+  if (movedDesc.length){
+    const after = dragState.taskEl.nextSibling;
+    for (const el of movedDesc){
+      list.insertBefore(el, after);
+    }
+  }
+
   // Wait and clean
   try{ await ghostAnim.finished; }catch{}
   dragState.ghost.remove();
@@ -1052,8 +1077,19 @@ async function pointerUp(e){
   const map = new Map(state.tasks.map(t => [t.id, t]));
   const moved = map.get(dragState.id);
   if (moved){
-    moved.parentId = dragState.newParentId || null;
+    const newPid = dragState.newParentId || null;
+    moved.parentId = newPid;
     moved.updatedAt = nowISO();
+
+    // Prevent sub-subtasks: if moved task has descendants, re-parent them to the same new parent
+    if (newPid){
+      for (const t of state.tasks){
+        if (t.id !== moved.id && isDescendantOf(t.id, moved.id)){
+          t.parentId = newPid;
+          t.updatedAt = nowISO();
+        }
+      }
+    }
   }
   state.tasks = ids.map(id => map.get(id)).filter(Boolean);
 
