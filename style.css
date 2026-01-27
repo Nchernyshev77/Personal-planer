@@ -292,7 +292,7 @@ min-height: 46px;
 .tasks{
   display:flex;
   flex-direction:column;
-  gap: 10px;
+  gap: 0;
 }
 
 .task{
@@ -773,28 +773,29 @@ button:focus{ outline:none; }
   color: rgba(255,255,255,0.92) !important;
 }
 
-/* v45: restore bottom green glow and keep it above content */
-.task{ position: relative; }
-.task .subzone{ z-index: 8 !important; opacity: 0; transition: opacity .12s ease, background .12s ease; }
-.task .subzoneLabel{ z-index: 9 !important; opacity: 0; }
-.task .subzoneHit{ z-index: 10 !important; opacity: 0; pointer-events: auto; }
-.task:hover .subzone{
-  opacity: 1 !important;
-  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(65,165,140,0.16) 100%) !important;
-}
-.task:hover .subzoneHit{ opacity: 1 !important; }
-.task:hover .subzoneLabel{ opacity: 1 !important; }
-.task:hover .subzoneHit:hover + .subzoneLabel{ color: rgba(255,255,255,0.92) !important; }
+/* v47: spacing ONLY between top-level task groups (not between subtasks) */
+.task.groupEnd{ margin-bottom: 10px; }
 
-/* v46: make bottom add-subtask glow clearly visible */
-.task .subzone{
-  z-index: 50 !important;
+/* v47: restore bottom green glow for adding subtask (top-level tasks only) */
+.task:not(.subtask) .subzone,
+.task:not(.subtask) .subzoneHit,
+.task:not(.subtask) .subzoneLabel{
+  height: 26px !important;
 }
-.task:hover .subzone{
+.task:not(.subtask) .subzone{
+  opacity: 0;
+  z-index: 60 !important;
+  transition: opacity .12s ease, background .12s ease;
+}
+.task:not(.subtask):hover .subzone{
   opacity: 1 !important;
-  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(65,165,140,0.22) 100%) !important;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(65,165,140,0.24) 100%) !important;
   border-bottom: 1px solid rgba(65,165,140,0.35) !important;
 }
-.task:hover .subzoneLabel{
-  opacity: 1 !important;
-}
+.task:not(.subtask):hover .subzoneHit{ opacity: 1 !important; }
+.task:not(.subtask):hover .subzoneLabel{ opacity: 1 !important; }
+
+/* Hide add-subtask UI on subtasks */
+.task.subtask .subzone,
+.task.subtask .subzoneHit,
+.task.subtask .subzoneLabel{ display:none !important; }

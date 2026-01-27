@@ -606,20 +606,12 @@ function renderTotal(){
   const el = $("#totalTime");
   if (!el) return;
 
-  const r2 = (x) => Math.round(x * 100) / 100;
-  const fmt = (x) => {
-    const v = r2(x);
-    const i = Math.trunc(v);
-    const frac = Math.abs(v - i);
-    // v44: if fractional part is 0.xx (e.g., 10.01, 8.04) show integer
-    if (frac > 1e-9 && frac < 0.1) return String(i);
-    return String(v);
-  };
+  const r = (x) => Math.round(x * 100) / 100;
 
   if (!hasRange && Math.abs(minSum - maxSum) < 1e-9){
-    el.textContent = `${fmt(minSum)} ч`;
+    el.textContent = `${r(minSum)} ч`;
   }else{
-    el.textContent = `${fmt(minSum)}-${fmt(maxSum)} ч`;
+    el.textContent = `${r(minSum)}-${r(maxSum)} ч`;
   }
 }
 
@@ -823,6 +815,15 @@ for (const t of tasks){
   }
   renderTotal();
   requestAnimationFrame(renderConnectors);
+  // v47: mark end-of-group tasks to add spacing between top-level groups only
+  const els = [...list.querySelectorAll(".task")];
+  for (const el of els) el.classList.remove("groupEnd");
+  const top = els.filter(el => !el.dataset.parentId);
+  for (const el of top){
+    const last = findLastDescendantEl(el) || el;
+    last.classList.add("groupEnd");
+  }
+
 }
 
 
@@ -1060,19 +1061,8 @@ async function pointerUp(e){
   const map = new Map(state.tasks.map(t => [t.id, t]));
   const moved = map.get(dragState.id);
   if (moved){
-    const newPid = dragState.newParentId || null;
-    moved.parentId = newPid;
+    moved.parentId = dragState.newParentId || null;
     moved.updatedAt = nowISO();
-
-    // v44: when moving a task that has subtasks under another task, flatten its subtasks to the new parent
-    if (newPid){
-      for (const t of state.tasks){
-        if (t.parentId === moved.id || isDescendantOf(t.id, moved.id)){
-          t.parentId = newPid;
-          t.updatedAt = nowISO();
-        }
-      }
-    }
   }
   state.tasks = ids.map(id => map.get(id)).filter(Boolean);
 
